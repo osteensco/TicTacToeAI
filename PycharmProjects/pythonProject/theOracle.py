@@ -18,3 +18,5 @@ elif activity == 3:
     choice = random.randint(0, (len(fun) - 1))
     decision = fun[choice]
     print(decision)
+
+#added a comment for testing out git
