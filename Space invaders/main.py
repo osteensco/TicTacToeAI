@@ -9,6 +9,7 @@ pygame.font.init()
 #__.blit places something in the window. in this game WIN is our window so you'll see objects placed by WIN.blit
 
 #TO DO:
+#______
 #______make a more robust start menu
 #______separate enemy laser vel and play laser vel
 #______enemy lasers dont disappear after enemies die
@@ -181,7 +182,7 @@ def main_loop():
     clock = pygame.time.Clock()
 
     lost = False
-
+    lost_count = 0
 
     def redraw_window():
         WIN.blit(Background, (0,0))#background is anchored to top left corner
@@ -211,7 +212,7 @@ def main_loop():
     while run:
         clock.tick(FPS)#this tells the game how fast to run, set by FPS variable
         redraw_window()
-        lost_count = 0
+
 
         if lives <= 0:
             lost = True
@@ -271,21 +272,21 @@ def main_loop():
 
         player.move_lasers(-laser_vel, enemies)
 
-    main_menu()
+
 
 def main_menu():
     title_font = pygame.font.SysFont("comicsans", 70)
     run = True
     while run:
         WIN.blit(Background, (0,0))
-        title_label = title_font.render("Press any key to begin", 1, (255,255,255))
+        title_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, HEIGHT/2 - title_label.get_height()/2))
         pygame.display.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.K_RETURN:
                 main_loop()
     quit()
 
