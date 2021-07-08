@@ -1,8 +1,8 @@
 import pygame
 import os
-import time
 import random
 pygame.font.init()
+
 
 #General notes
 #pygame anchors objects on their top left corner. so, this needs to be accounted for in object movement/placement
@@ -22,22 +22,30 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders!")
 
 
-#Load images
+#helper functions/variables
 #func to load images
 def sprite(folder, image_name):
     return pygame.image.load(os.path.join(folder, image_name))
 
+#variable to start timer, get ticks
+timer = pygame.time.get_ticks()
 
+
+#Load images
 #drops
 health_drop = sprite("assets", "health_drop.png")
+fire_rate_drop = sprite("assets", "fire_rate_drop.png")
+shield_drop = sprite("assets", "shield_drop.png")
 
 #ships
 red_space_ship = sprite("assets", "pixel_ship_red_small.png")
 green_space_ship = sprite("assets", "pixel_ship_green_small.png")
 blue_space_ship = sprite("assets", "pixel_ship_blue_small.png")
+explosion = sprite("assets", "explosion.png")
 
 #player ship
 player_space_ship = sprite("assets", "pixel_ship_yellow.png")
+player_ship_shield = sprite("assets", "player_ship_shield.png")
 
 #Lasers
 red_laser = sprite("assets", "pixel_laser_red.png")
@@ -53,31 +61,43 @@ title_font = pygame.font.SysFont("comicsans", 60)
 
 
 #drop effects as functions, move to drop class??
-def health(obj):
+def health_buff(obj):
     if obj.health < 100:
         obj.health = 100
     else:
         obj.lives += 1
 
+def fire_rate_buff(obj):
+    if obj.COOLDOWN > 5:
+        obj.COOLDOWN -= 2
+
+def shield_buff(obj):
+    shield_start = timer
+    obj.ship_img = player_ship_shield
+    while obj.ship_img == player_ship_shield:
+        shield_active_time = (timer - shield_start)/1000
+        if shield_active_time > 5:
+            obj.ship_img = player_space_ship
+            break
 
 
-def drop_power(obj):
-    if random.randint(1, 3) == 1:
-        # need to add drop map similar to color map in enemy
-        drop = Drop(obj.x, obj.y, random.choice("health"))
-        drops.append(drop)
+DROP_MAP = {
+            "health": (health_buff, health_drop),
+            "fire rate": (fire_rate_buff, fire_rate_drop)
+            }
+
+
 #______CLASSES_______________________________________________________________________________________
 
 class Drop:
-    DROP_MAP = {
-                "health": (health, health_drop)
-                }
+
 
     def __init__(self, x, y, power):
         self.x = x
         self.y = y
         self.effect, self.img = DROP_MAP[power]
         self.mask = pygame.mask.from_surface(self.img)
+        self.vel = 1
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
@@ -85,8 +105,12 @@ class Drop:
     def move(self, vel):
         self.y += vel
 
+    def off_screen(self, height):
+        return not(self.y <= height and self.y >= 0)
+
     def collision(self, obj):
         return collide(self, obj)
+
 
     #find a way to connect the effect to a specific function (health example is below after collide and before main loop)
 
@@ -133,6 +157,8 @@ class Ship:
         window.blit(self.ship_img, (self.x, self.y))
         for laser in self.lasers:
             laser.draw(window)
+        for drop in self.drops:
+            drop.draw(window)
 
     def move_lasers(self, vel, obj):
         self.cooldown()
@@ -144,13 +170,19 @@ class Ship:
                 obj.health -= 10
                 self.lasers.remove(laser)
 
+    def drop_(self):
+        if random.randint(0,10) == 1:
+            drop = Drop(self.x, self.y, random.choice(["health", "fire rate"]))
+            self.drops.append(drop)
 
-
-    # def move_drops(self, vel, obj):    #move this to player class???
-    #     drop.move(vel)
-    #     if drop.collision(obj):
-    #         effect()
-
+    def move_drops(self, vel, obj):#
+        for drop in self.drops:
+            drop.move(vel)
+            if drop.collision(obj):
+                self.drops.remove(drop)
+                drop.effect(obj)
+            if drop.off_screen(HEIGHT):
+                self.drops.remove(drop)
 
     def cooldown(self):
         if self.cool_down_counter >= self.COOLDOWN:
@@ -181,6 +213,7 @@ class Player(Ship):
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
         self.drops = []
+        self.lives = 2
 
 
     def move_lasers(self, vel, objs):
@@ -191,9 +224,10 @@ class Player(Ship):
                 self.lasers.remove(laser)
             else:
                 for obj in objs:
-                    if laser.collision(obj):#note this is different than move lasers in Ship class. Enemy ships don't have halth right now.
-                        objs.remove(obj)#add drops below here. need another if statement for boss drops.
-                        drop_power(obj)
+                    if laser.collision(obj) and not obj.destroyed:#note this is different than move lasers in Ship class. Enemy ships don't have halth right now.
+                        obj.drop_()
+                        obj.ship_img = explosion
+                        obj.destroyed = True
                         if laser in self.lasers:
                             self.lasers.remove(laser)
 
@@ -214,9 +248,10 @@ class Enemy(Ship):
                 "blue": (blue_space_ship, blue_laser)
                 }
 
-    def __init__(self, x, y, color, health=100):
-        self.vel = 1
+    def __init__(self, x, y, color, vel, health=100):
+        self.vel = vel
         self.direction = True
+        self.destroyed = False
         super().__init__(x, y, health)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
@@ -247,16 +282,16 @@ def main_loop():
     run = True
     FPS = 90
     level = 0
-    lives = 2
     main_font = pygame.font.SysFont("comicsans", 50)
     lost_font = pygame.font.SysFont("comicsans", 100)
 
-    drops = []#initialize similar to how enemies spawn (in game loop), but trigger on enemy removal.
+    #drops = []#initialize similar to how enemies spawn (in game loop), but trigger on enemy removal.
     #actions of drops (movement, effect functions) should live in the drop class
     #like enemies in some ways, lasers in others????
     enemies = []
     wave_length = 3
     # enparmove = round(enemy.vel*1.2)
+    enemy_vel = 1
     enemy_laser_vel = 4
     laser_vel = 20
 
@@ -270,13 +305,14 @@ def main_loop():
     lost_count = 0
     transition_count = 0
 
+
     def redraw_window():
         WIN.blit(Background, (0,0))#background is anchored to top left corner
         #draw text
-        if lives == 1:
-            lives_label = main_font.render(f"Lives: {lives}", 1, (255,0,0))#lives label top left corner, red for 1 life left
+        if player.lives == 1:
+            lives_label = main_font.render(f"Lives: {player.lives}", 1, (255,0,0))#lives label top left corner, red for 1 life left
         else:
-            lives_label = main_font.render(f"Lives: {lives}", 1, (255, 255, 255))#lives label top left corner
+            lives_label = main_font.render(f"Lives: {player.lives}", 1, (255, 255, 255))#lives label top left corner
 
         level_label = main_font.render(f"Level: {level}", 1, (255,255,255))#level label top right corner
 
@@ -288,7 +324,7 @@ def main_loop():
 
         player.draw(WIN)
 
-        if len(enemies) == 0 and lives > 0 and level > 0:
+        if len(enemies) == 0 and player.lives > 0 and level > 0:
             level_label = title_font.render(f"Level Complete! Wave {level+1} incoming!", 1, (255, 255, 255))
             WIN.blit(level_label, (WIDTH / 2 - level_label.get_width() / 2, HEIGHT / 2 - level_label.get_height() / 2))
 
@@ -320,7 +356,7 @@ def main_loop():
             player.shoot()
 
 #checks if game has been lost
-        if lives <= 0:
+        if player.lives <= 0:
             lost = True
 
             if lost:
@@ -338,42 +374,50 @@ def main_loop():
             level += 1
             wave_length += 1
             if level % 5 == 0:
-                lives += 1
-                Enemy.vel += 1
+                player.lives += 1
+                enemy_vel += 1
                 enemy_laser_vel += 2
             transition_count = 0
+
             for i in range(wave_length):
                 enemy = Enemy(random.randrange(50, WIDTH - 100), random.randrange(-1500, 10),
-                              random.choice(["red", "blue", "green"]))
+                              random.choice(["red", "blue", "green"]), enemy_vel)
                 enemies.append(enemy)
+
 
 #makes enemies move, shoot, randomizes shooting
         for enemy in enemies:
-
-            enemy.move(enemy.vel)
+            if not enemy.destroyed:
+                enemy.move(enemy.vel)
+            enemy.move_lasers(enemy_laser_vel, player)
 
             if enemy.y < 0:#will move down
                 enemy.direction = True
             if enemy.y + enemy.get_height() > HEIGHT:#will move back up
                 enemy.direction = False
 
-            enemy.move_lasers(enemy_laser_vel, player)
 
             if level > 9:
-                if random.randrange(0, FPS) == 1:
+                if not enemy.destroyed and random.randrange(0, FPS) == 1:
                     enemy.shoot()
             if level < 10:
-                if random.randrange(0, (10 - level) * FPS) == 1:#random enemy shot tempo
+                if not enemy.destroyed and random.randrange(0, (10 - level) * FPS) == 1:#random enemy shot tempo
                     enemy.shoot()
 
-            if collide(enemy, player):
+            if not enemy.destroyed and collide(enemy, player):
                 player.health -= 20
                 enemies.remove(enemy)
+
+            if enemy.destroyed:
+                for drop in enemy.drops:
+                    enemy.move_drops(drop.vel, player)
+                if enemy.drops == []:
+                    enemies.remove(enemy)
 
 
 
         if player.health <= 0:#player health track (shields, w/e)
-            lives -= 1
+            player.lives -= 1
             player.health = 100
 
 
