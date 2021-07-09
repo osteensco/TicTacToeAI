@@ -27,8 +27,11 @@ pygame.display.set_caption("Space Invaders!")
 def sprite(folder, image_name):
     return pygame.image.load(os.path.join(folder, image_name))
 
-#variable to start timer, get ticks
-timer = pygame.time.get_ticks()
+#check for objects colliding
+def collide(obj1, obj2):
+    offset_x = obj2.x - obj1.x
+    offset_y = obj2.y - obj1.y
+    return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
 
 
 #Load images
@@ -59,6 +62,17 @@ Background = pygame.transform.scale(sprite("assets", "background-black.png"), (W
 #menu and in game messaging font
 title_font = pygame.font.SysFont("comicsans", 60)
 
+#Global variables
+FPS = 90
+shield_base_time = 5
+enemy_vel = 1
+enparmove = round(enemy_vel*1.2)
+enemy_laser_vel = 4
+laser_vel = 20
+player_vel = 10
+default_mask = pygame.mask.from_surface(player_space_ship)
+shield_mask = pygame.mask.from_surface(player_ship_shield)
+
 
 #drop effects as functions, move to drop class??
 def health_buff(obj):
@@ -72,19 +86,17 @@ def fire_rate_buff(obj):
         obj.COOLDOWN -= 2
 
 def shield_buff(obj):
-    shield_start = timer
-    obj.ship_img = player_ship_shield
-    while obj.ship_img == player_ship_shield:
-        shield_active_time = (timer - shield_start)/1000
-        if shield_active_time > 5:
-            obj.ship_img = player_space_ship
-            break
+        obj.immune = True
+        obj.shield_timer += FPS*shield_base_time
+        obj.ship_img = player_ship_shield
+        obj.mask = shield_mask
 
 
 DROP_MAP = {
-            "health": (health_buff, health_drop),
-            "fire rate": (fire_rate_buff, fire_rate_drop)
-            }
+        "health": (health_buff, health_drop),
+        "fire rate": (fire_rate_buff, fire_rate_drop),
+        "shield": (shield_buff, shield_drop)
+    }
 
 
 #______CLASSES_______________________________________________________________________________________
@@ -130,8 +142,8 @@ class Laser:
 
     def move(self, vel):
         self.y += vel
-#___determines if laser if off screen
-    def off_screen(self, height):
+
+    def off_screen(self, height):#___determines if laser if off screen
         return not(self.y <= height and self.y >= 0)
 
     def collision(self, obj):
@@ -152,6 +164,9 @@ class Ship:
         self.cool_down_counter = 0
         self.drops = []
         self.drop_img = None
+        self.immune = False
+        self.shield_timer = 0
+        self.destroyed = False
 
     def draw(self, window):
         window.blit(self.ship_img, (self.x, self.y))
@@ -166,14 +181,16 @@ class Ship:
             laser.move(vel)
             if laser.off_screen(HEIGHT):
                 self.lasers.remove(laser)
-            elif laser.collision(obj):
+            elif laser.collision(obj) and not obj.immune:
                 obj.health -= 10
                 self.lasers.remove(laser)
 
     def drop_(self):
-        if random.randint(0,10) == 1:
-            drop = Drop(self.x, self.y, random.choice(["health", "fire rate"]))
+        if random.randint(1,10) > 8:#random.randint(0,10)
+            drop = Drop(self.x, self.y, random.choice(["health", "fire rate", "shield"])) #random.choice()
             self.drops.append(drop)
+        self.ship_img = explosion
+        self.destroyed = True
 
     def move_drops(self, vel, obj):#
         for drop in self.drops:
@@ -210,10 +227,11 @@ class Player(Ship):
         super().__init__(x, y, health)
         self.ship_img = player_space_ship
         self.laser_img = yellow_laser
-        self.mask = pygame.mask.from_surface(self.ship_img)
+        self.mask = default_mask
         self.max_health = health
         self.drops = []
         self.lives = 2
+
 
 
     def move_lasers(self, vel, objs):
@@ -224,10 +242,8 @@ class Player(Ship):
                 self.lasers.remove(laser)
             else:
                 for obj in objs:
-                    if laser.collision(obj) and not obj.destroyed:#note this is different than move lasers in Ship class. Enemy ships don't have halth right now.
+                    if laser.collision(obj) and not obj.destroyed:#note this is different than move lasers in Ship class. Enemy ships don't have health right now.
                         obj.drop_()
-                        obj.ship_img = explosion
-                        obj.destroyed = True
                         if laser in self.lasers:
                             self.lasers.remove(laser)
 
@@ -243,44 +259,60 @@ class Player(Ship):
 
 class Enemy(Ship):
     COLOR_MAP = {
-                "red": (red_space_ship, red_laser),
-                "green": (green_space_ship, green_laser),
-                "blue": (blue_space_ship, blue_laser)
-                }
+        "red": (red_space_ship, red_laser),
+        "green": (green_space_ship, green_laser),
+        "blue": (blue_space_ship, blue_laser)
+    }
 
     def __init__(self, x, y, color, vel, health=100):
         self.vel = vel
         self.direction = True
-        self.destroyed = False
+        self.left = False
+        self.right = False
+        self.move_time = 0
         super().__init__(x, y, health)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
 
-    def move(self, vel):#for random side-side movement included add in parallel
+    def move(self, vel, parallel):#for random side-side movement included add in parallel
         if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
             self.y += vel
         if not self.direction:
             self.y -= vel*2
-        # if random.randrange(1, 10) > 8 and self.x + self.get_width() < WIDTH:
-        #     self.x += parallel
-        # elif random.randrange(1, 10) > 6 and self.x > -1:
-        #     self.x -= parallel
-
-def collide(obj1, obj2):
-    offset_x = obj2.x - obj1.x
-    offset_y = obj2.y - obj1.y
-    return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
-
-
+        if self.right:
+            if self.x + self.get_width() < WIDTH:
+                self.x += parallel
+            self.move_time -= 1
+        if self.left:
+            if self.x > -1:
+                self.x -= parallel
+            self.move_time -= 1
+        if self.move_time == 0:
+            left_right = random.randint(1, 10)
+            if left_right > 8:
+                self.right = True
+                self.left = False
+                self.move_time = FPS * (random.randint(1, 4))
+            elif left_right < 3:
+                self.left = True
+                self.right = False
+                self.move_time = FPS * (random.randint(1, 4))
+            else:
+                if self.right or self.left:
+                    self.right = False
+                    self.left = False
 
 
 
 #_____________________________________________________________________________________________
 
+
+
+
 #game loop
 def main_loop():
     run = True
-    FPS = 90
+
     level = 0
     main_font = pygame.font.SysFont("comicsans", 50)
     lost_font = pygame.font.SysFont("comicsans", 100)
@@ -290,7 +322,6 @@ def main_loop():
     #like enemies in some ways, lasers in others????
     enemies = []
     wave_length = 3
-    # enparmove = round(enemy.vel*1.2)
     enemy_vel = 1
     enemy_laser_vel = 4
     laser_vel = 20
@@ -388,7 +419,7 @@ def main_loop():
 #makes enemies move, shoot, randomizes shooting
         for enemy in enemies:
             if not enemy.destroyed:
-                enemy.move(enemy.vel)
+                enemy.move(enemy.vel, enparmove)
             enemy.move_lasers(enemy_laser_vel, player)
 
             if enemy.y < 0:#will move down
@@ -405,8 +436,11 @@ def main_loop():
                     enemy.shoot()
 
             if not enemy.destroyed and collide(enemy, player):
-                player.health -= 20
-                enemies.remove(enemy)
+                if not player.immune:
+                    player.health -= 20
+                    enemies.remove(enemy)
+                if player.immune:
+                    enemy.drop_()
 
             if enemy.destroyed:
                 for drop in enemy.drops:
@@ -414,6 +448,13 @@ def main_loop():
                 if enemy.drops == []:
                     enemies.remove(enemy)
 
+        if player.immune:
+            player.shield_timer -= 1
+
+            if player.shield_timer == 0:
+                player.ship_img = player_space_ship
+                player.mask = default_mask
+                player.immune = False
 
 
         if player.health <= 0:#player health track (shields, w/e)
