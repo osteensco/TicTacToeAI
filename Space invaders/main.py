@@ -51,6 +51,18 @@ explosion = sprite("assets", "explosion.png")
 explosion2 = sprite("assets", "Boom.png")
 no_ship = sprite("assets", "blank.png")
 
+#boss stuff
+boss_vul = sprite("assets", "boss_0.png")
+boss_invul = sprite("assets", "boss_0_0.png")
+boss_0 = [boss_invul, boss_vul]
+boss_0_asset_1 = sprite("assets", "boss_0_asset_1.png")
+boss_0_asset_2 = sprite("assets", "boss_0_asset_2.png")
+boss_0_asset_3 = sprite("assets", "boss_0_asset_3.png")
+boss_0_asset_4 = sprite("assets", "boss_0_asset_4.png")
+boss_0_asset_5 = sprite("assets", "boss_0_asset_5.png")
+boss_0_asset = [boss_0_asset_1, boss_0_asset_2, boss_0_asset_3, boss_0_asset_4, boss_0_asset_5]
+boss_weapon_0 = sprite("assets", "boss_weapon_0.png")
+
 #player ship
 player_space_ship = sprite("assets", "pixel_ship_yellow.png")
 player_ship_shield = sprite("assets", "player_ship_shield.png")
@@ -85,7 +97,7 @@ shield_mask = pygame.mask.from_surface(player_ship_shield)
 def health_buff(obj):
     obj.score += 1
     if obj.health < obj.max_health or obj.lives > 9:
-        obj.health += 5
+        obj.health = obj.max_health
     elif obj.lives < 10:
         obj.lives += 1
         obj.health = 20
@@ -203,11 +215,13 @@ class Ship:
         self.max_health = health
         self.health = self.max_health
         self.ship_img = None
+        self.mask = None
         self.laser_img = None
-        self.lasers = []#because lasers list is in class, lasers will disappear when ship is destroyed
+        self.lasers = []#lasers disappear when ship is destroyed, could change and handle like drops do
         self.laser_vel = laser_vel
         self.cool_down_counter = 0
         self.drops = []
+        self.assets = []
         self.drop_img = None
         self.immune = False
         self.shield_timer = 0
@@ -216,8 +230,40 @@ class Ship:
         self.butterfly_dir = 0
         self.butterfly_vel = 0
         self.origin_cool = 0
+        self.direction = True
+        self.left = False
+        self.right = False
+        self.move_time = 0
         self.destroyed = False
         self.enemy_power = set_enemy_power
+
+    def move(self, vel, parallel):#for random side-side movement included add in parallel
+        if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
+            self.y += vel
+        if not self.direction:
+            self.y -= vel*2
+        if self.right:
+            if self.x + self.get_width() < WIDTH:
+                self.x += parallel
+            self.move_time -= 1
+        if self.left:
+            if self.x > -1:
+                self.x -= parallel
+            self.move_time -= 1
+        if self.move_time == 0:
+            left_right = random.randint(1, 10)
+            if left_right > 8:
+                self.right = True
+                self.left = False
+                self.move_time = set_FPS * (random.randint(1, 4))
+            elif left_right < 3:
+                self.left = True
+                self.right = False
+                self.move_time = set_FPS * (random.randint(1, 4))
+            else:
+                if self.right or self.left:
+                    self.right = False
+                    self.left = False
 
     def draw(self, window):
         window.blit(self.ship_img, (self.x, self.y))
@@ -303,13 +349,24 @@ class Player(Ship):
                     self.score -= 1
             else:
                 for obj in objs:
-                    if laser.collision(obj) and not obj.destroyed:#note this is different than move lasers in Ship class. Enemy ships don't have health right now.
-                        obj.health -= 100
-                        if obj.health <= 0:
-                            self.score += obj.max_health
-                            obj.drop_()
+                    if laser.collision(obj) and not obj.destroyed:
+                        if not obj.immune:
+                            obj.health -= 100
+                            if obj.health <= 0:
+                                self.score += obj.max_health
+                                obj.drop_()
                         if laser in self.lasers and not self.butterfly_gun:
                             self.lasers.remove(laser)
+
+                    if type(obj).__name__ is Boss:
+                        for asset in obj.assets:
+                            if laser.collision(asset) and not asset.destroyed:
+                                if not asset.immune:
+                                    asset.health -= 100
+                                    if obj.health <= 0:
+                                        obj.drop_()
+                                if laser in self.lasers and not self.butterfly_gun:
+                                    self.lasers.remove(laser)
 
     def draw(self, window):
         super().draw(window)
@@ -327,6 +384,29 @@ class Enemy(Ship):
     }
 
     def __init__(self, x, y, color, vel, health=100):
+        super().__init__(x, y, health)
+        self.vel = vel
+        self.max_health = health
+        self.health = self.max_health
+        self.ship_img, self.laser_img = self.COLOR_MAP[color]
+        self.mask = pygame.mask.from_surface(self.ship_img)
+
+
+
+
+#______________________________________________________________________________________________________________________
+#______________________________________________________________________________________________________________________
+
+class Boss(Ship):#have separate lists for boss, boss asset, boss weapon. randomize these matches. Keep in dict for
+                                                            # key/values like color map?
+    def __init__(self, x, y, boss_img, asset_imgs, weapon_img, vel, health=10000):
+        super().__init__(x, y, health)
+        self.x = x
+        self.y = y
+        self.ship_img, self.vul_img = boss_img
+        self.asset_img = asset_imgs
+        self.laser_img = weapon_img
+        self.mask = pygame.mask.from_surface(self.ship_img)
         self.vel = vel
         self.max_health = health
         self.health = self.max_health
@@ -334,43 +414,28 @@ class Enemy(Ship):
         self.left = False
         self.right = False
         self.move_time = 0
-        super().__init__(x, y, health)
-        self.ship_img, self.laser_img = self.COLOR_MAP[color]
-        self.mask = pygame.mask.from_surface(self.ship_img)
-
-    def move(self, vel, parallel):#for random side-side movement included add in parallel
-        if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
-            self.y += vel
-        if not self.direction:
-            self.y -= vel*2
-        if self.right:
-            if self.x + self.get_width() < WIDTH:
-                self.x += parallel
-            self.move_time -= 1
-        if self.left:
-            if self.x > -1:
-                self.x -= parallel
-            self.move_time -= 1
-        if self.move_time == 0:
-            left_right = random.randint(1, 10)
-            if left_right > 8:
-                self.right = True
-                self.left = False
-                self.move_time = set_FPS * (random.randint(1, 4))
-            elif left_right < 3:
-                self.left = True
-                self.right = False
-                self.move_time = set_FPS * (random.randint(1, 4))
-            else:
-                if self.right or self.left:
-                    self.right = False
-                    self.left = False
 
 
-#______________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________
+    def draw(self, window):
+        super().draw(window)
+        for asset in self.asset_img:
+            window.blit(asset, (self.x, self.y))
 
-# class Boss(Enemy):
+    def add_assets(self, obj):
+        for i in range(len(self.asset_img)):
+            asset = Ship(self.x, self.y, self.max_health / obj.enemy_power)
+            asset.mask = pygame.mask.from_surface(self.asset_img[i])
+            self.assets.append(asset)
+
+    def shield_active(self):
+        self.immune = True
+
+    def shield_down(self):
+        self.immune = False
+        self.ship_img = self.vul_img
+        self.mask = self.mask
+
+
 
 
 
@@ -512,10 +577,15 @@ def main_loop():
                 enemy_vel += 1
                 enemy_laser_vel += 2
                 player.enemy_power += 10
+            if level == 1:
+                boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel)
+                enemies.append(boss)
+                boss.add_assets(player)
+                boss.shield_active()
             transition_count = 0
 
             for i in range(wave_length):
-                enemy = Enemy(random.randrange(50, WIDTH - 100), random.randrange(-1500, 10),
+                enemy = Enemy(random.randrange(0, WIDTH - 50), random.randrange(-1000+(100*level), 20),
                               random.choice(list(Enemy.COLOR_MAP)), enemy_vel, player.enemy_power*10)
                 enemies.append(enemy)
 
@@ -555,6 +625,11 @@ def main_loop():
                 if player.immune:
                     player.score += enemy.max_health*2
                     enemy.drop_()
+
+            if type(enemy).__name__ is Boss:
+                if enemy.assets == []:
+                    enemy.shield_down()
+
 
 #check player buff conditions and update stuff
         if player.immune:
