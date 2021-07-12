@@ -198,7 +198,6 @@ class Laser:
         else:
             return not (width >= self.x > -1)
 
-
     def collision(self, obj):
         return collide(self, obj)
 
@@ -222,7 +221,6 @@ class Ship:
         self.cool_down_counter = 0
         self.drops = []
         self.assets = []
-        self.drop_img = None
         self.immune = False
         self.shield_timer = 0
         self.butterfly_gun = False
@@ -349,16 +347,8 @@ class Player(Ship):
                     self.score -= 1
             else:
                 for obj in objs:
-                    if laser.collision(obj) and not obj.destroyed:
-                        if not obj.immune:
-                            obj.health -= 100
-                            if obj.health <= 0:
-                                self.score += obj.max_health
-                                obj.drop_()
-                        if laser in self.lasers and not self.butterfly_gun:
-                            self.lasers.remove(laser)
 
-                    if type(obj).__name__ is Boss:
+                    if type(obj).__name__ == "Boss":
                         for asset in obj.assets:
                             if laser.collision(asset) and not asset.destroyed:
                                 if not asset.immune:
@@ -367,6 +357,14 @@ class Player(Ship):
                                         obj.drop_()
                                 if laser in self.lasers and not self.butterfly_gun:
                                     self.lasers.remove(laser)
+                    if laser.collision(obj) and not obj.destroyed:
+                        if not obj.immune:
+                            obj.health -= 100
+                            if obj.health <= 0:
+                                self.score += obj.max_health
+                                obj.drop_()
+                        if laser in self.lasers and not self.butterfly_gun:
+                            self.lasers.remove(laser)
 
     def draw(self, window):
         super().draw(window)
@@ -418,13 +416,14 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon. randomi
 
     def draw(self, window):
         super().draw(window)
-        for asset in self.asset_img:
-            window.blit(asset, (self.x, self.y))
+        for asset in self.assets:
+            window.blit(asset.ship_img, (self.x, self.y))
 
-    def add_assets(self, obj):
+    def add_assets(self):
         for i in range(len(self.asset_img)):
-            asset = Ship(self.x, self.y, self.max_health / obj.enemy_power)
-            asset.mask = pygame.mask.from_surface(self.asset_img[i])
+            asset = Ship(self.x, self.y, self.max_health / 10)
+            asset.ship_img = self.asset_img[i]
+            asset.mask = pygame.mask.from_surface(asset.ship_img)
             self.assets.append(asset)
 
     def shield_active(self):
@@ -579,9 +578,9 @@ def main_loop():
                 player.enemy_power += 10
             if level == 1:
                 boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel)
-                enemies.append(boss)
-                boss.add_assets(player)
+                boss.add_assets()
                 boss.shield_active()
+                enemies.append(boss)
             transition_count = 0
 
             for i in range(wave_length):
@@ -616,7 +615,7 @@ def main_loop():
                 if enemy.drops == []:
                     enemies.remove(enemy)
 
-            if not enemy.destroyed and collide(enemy, player):
+            if not enemy.destroyed and type(enemy).__name__ != "Boss" and collide(enemy, player):
                 if not player.immune:
                     player.score -= 20
                     player.health -= player.enemy_power
@@ -626,9 +625,16 @@ def main_loop():
                     player.score += enemy.max_health*2
                     enemy.drop_()
 
-            if type(enemy).__name__ is Boss:
+            if type(enemy).__name__ == "Boss":
                 if enemy.assets == []:
                     enemy.shield_down()
+                else:
+                    for asset in enemy.assets:
+                        if not asset.destroyed and collide(asset, player):
+                            player.score -= 20
+                            player.health -= player.enemy_power
+                            asset.ship_img = explosion
+                            asset.destroyed = True
 
 
 #check player buff conditions and update stuff
