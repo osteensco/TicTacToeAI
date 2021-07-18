@@ -80,7 +80,7 @@ Background = pygame.transform.scale(sprite("assets", "background-black.png"), (W
 #menu and in game messaging font
 title_font = pygame.font.SysFont("comicsans", 60)
 
-#Global variables
+# variables
 set_FPS = 90#handle all variables like this so that they can be adjusted in settings menu?
 shield_base_time = 3
 enemy_vel = 1
@@ -280,13 +280,14 @@ class Ship:
             laser.move(vel)
             if laser.off_screen(HEIGHT, WIDTH):
                 self.lasers.remove(laser)
-            elif laser.collision(obj) and not obj.immune:
-                obj.health -= obj.enemy_power/2
+            elif laser.collision(obj):
+                if not obj.immune:
+                    obj.health -= obj.enemy_power/2
                 self.lasers.remove(laser)
 
-    def drop_(self):
-        if random.randint(1,10) > 8:#random.randint(0,10)
-            drop = Drop(self.x, self.y, random.choice(list(DROP_MAP))) #random.choice(list(DROP_MAP)
+    def drop_(self, range_low=1, range_high=10, threshold=8):
+        if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
+            drop = Drop(self.x + round(self.ship_img.get_width()/2), self.y, random.choice(list(DROP_MAP))) #random.choice(list(DROP_MAP)
             self.drops.append(drop)
         self.ship_img = explosion2
         self.destroyed = True
@@ -308,10 +309,12 @@ class Ship:
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x, self.y, self.butterfly_vel, self.butterfly_dir, self.laser_img)
+            laser = Laser(self.x + round(self.ship_img.get_width()/2), self.y, self.butterfly_vel, self.butterfly_dir, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
+    def collision(self, obj):
+        return collide(self, obj)
 
     def get_width(self):
         return self.ship_img.get_width()
@@ -347,24 +350,23 @@ class Player(Ship):
                     self.score -= 1
             else:
                 for obj in objs:
-
                     if type(obj).__name__ == "Boss":
                         for asset in obj.assets:
                             if laser.collision(asset) and not asset.destroyed:
-                                if not asset.immune:
-                                    asset.health -= 100
-                                    if obj.health <= 0:
-                                        obj.drop_()
+                                asset.health -= 100
+                                if asset.health <= 0:
+                                    asset.drop_(1, 10, 1)
                                 if laser in self.lasers and not self.butterfly_gun:
                                     self.lasers.remove(laser)
                     if laser.collision(obj) and not obj.destroyed:
+                        if laser in self.lasers and not self.butterfly_gun:
+                            self.lasers.remove(laser)
                         if not obj.immune:
                             obj.health -= 100
                             if obj.health <= 0:
                                 self.score += obj.max_health
                                 obj.drop_()
-                        if laser in self.lasers and not self.butterfly_gun:
-                            self.lasers.remove(laser)
+
 
     def draw(self, window):
         super().draw(window)
@@ -417,13 +419,13 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon. randomi
     def draw(self, window):
         super().draw(window)
         for asset in self.assets:
-            window.blit(asset.ship_img, (self.x, self.y))
+            asset.draw(window)
 
     def add_assets(self):
         for i in range(len(self.asset_img)):
             asset = Ship(self.x, self.y, self.max_health / 10)
             asset.ship_img = self.asset_img[i]
-            asset.mask = pygame.mask.from_surface(asset.ship_img)
+            asset.mask = pygame.mask.from_surface(self.asset_img[i])
             self.assets.append(asset)
 
     def shield_active(self):
@@ -432,7 +434,16 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon. randomi
     def shield_down(self):
         self.immune = False
         self.ship_img = self.vul_img
-        self.mask = self.mask
+        self.mask = pygame.mask.from_surface(self.ship_img)
+
+    def move_assets(self):#
+        for asset in self.assets:
+            asset.x = self.x
+            asset.y = self.y
+
+
+
+
 
 
 
@@ -500,10 +511,11 @@ def main_loop():
                 WIDTH / 2 - transition_level_label.get_width() / 2,
                 HEIGHT / 2 - transition_level_label.get_height() / 2))
 
-        player.draw(WIN)
 
         for enemy in enemies:
             enemy.draw(WIN)
+
+        player.draw(WIN)
 
         if lost:
             lost_label = lost_font.render("GAME OVER", 1, (255, 0, 0))
@@ -576,7 +588,7 @@ def main_loop():
                 enemy_vel += 1
                 enemy_laser_vel += 2
                 player.enemy_power += 10
-            if level == 1:
+            if level % 2 == 0:
                 boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel)
                 boss.add_assets()
                 boss.shield_active()
@@ -584,7 +596,7 @@ def main_loop():
             transition_count = 0
 
             for i in range(wave_length):
-                enemy = Enemy(random.randrange(0, WIDTH - 50), random.randrange(-1000+(100*level), 20),
+                enemy = Enemy(random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*level), 20),
                               random.choice(list(Enemy.COLOR_MAP)), enemy_vel, player.enemy_power*10)
                 enemies.append(enemy)
 
@@ -592,15 +604,16 @@ def main_loop():
 #makes enemies move, shoot, randomizes shooting
         for enemy in enemies:
             if not enemy.destroyed:
-                enemy.move(enemy.vel, enparmove)
-            enemy.move_lasers(enemy_laser_vel, player)
+                enemy.move(enemy.vel, enparmove)#move method
+            enemy.move_lasers(enemy_laser_vel, player)#move lasers after being shot method
 
+            #move prompts
             if enemy.y < 0:#will move down
                 enemy.direction = True
             if enemy.y + enemy.get_height() > HEIGHT:#will move back up
                 enemy.direction = False
 
-
+            #Enemy fire rate based on levels
             if level > 9:
                 if not enemy.destroyed and random.randrange(0, FPS) == 1:
                     enemy.shoot()
@@ -608,7 +621,7 @@ def main_loop():
                 if not enemy.destroyed and random.randrange(0, (10 - level) * FPS) == 1:#random enemy shot tempo
                     enemy.shoot()
 
-            if enemy.destroyed:
+            if enemy.destroyed:#initiates drop movement and removes enemy when drops expire/taken
                 for drop in enemy.drops:
                     enemy.move_drops(drop.vel, player)
                 enemy.ship_img = no_ship
@@ -626,15 +639,36 @@ def main_loop():
                     enemy.drop_()
 
             if type(enemy).__name__ == "Boss":
+                if not enemy.destroyed and collide(enemy, player):
+                    if not player.immune:
+                        player.score -= 20
+                        player.health -= 5
+                    if player.immune:
+                        enemy.health -= 1
+                        if enemy.health <= 0:
+                            enemy.drop
+
+                enemy.move_assets()
                 if enemy.assets == []:
                     enemy.shield_down()
                 else:
                     for asset in enemy.assets:
+                        if asset.destroyed:
+                            for drop in asset.drops:
+                                asset.move_drops(drop.vel, player)
+                            asset.ship_img = no_ship
+                            if asset.drops == []:
+                                enemy.assets.remove(asset)
                         if not asset.destroyed and collide(asset, player):
-                            player.score -= 20
-                            player.health -= player.enemy_power
-                            asset.ship_img = explosion
-                            asset.destroyed = True
+                            if not player.immune:
+                                player.score -= 20
+                                player.health -= 5
+                                asset.ship_img = explosion
+                                asset.destroyed = True
+                            else:
+                                asset.health -= 5
+                                if asset.health <= 0:
+                                    asset.drop_
 
 
 #check player buff conditions and update stuff
