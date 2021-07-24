@@ -10,8 +10,6 @@ pygame.font.init()
 
 #TO DO:
 #______make a more robust start menu with settings, etc
-#______enemy lasers dont disappear after enemies die
-#______add power ups, health, shields, etc
 #______add messages as things happen or levels/lives gained, lives lost, etc
 #______move everything into classes for better organization
 
