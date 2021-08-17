@@ -30,6 +30,12 @@ def play_game():
         printBoard(theBoard)
         print('Turn for ' + turn + '. Move on which space?')
         move = str(input())
+        if move == 'quit':
+            break
+        if move == 'reset':
+            print(f'''{turn} has reset the game.''')
+            resetboard()
+            play_game()
         if move not in theBoard:
             print('please enter top/mid/bot-L/M/R')
             continue
