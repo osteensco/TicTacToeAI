@@ -154,7 +154,7 @@ class Drop:
         self.angle = 0
 
     def img_rotate(self, img, angle):
-        self.angle += -3
+        self.angle += 3
         return pygame.transform.rotozoom(img, angle, 1)
 
     def draw(self, window):
