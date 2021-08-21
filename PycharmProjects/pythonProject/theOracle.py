@@ -1,5 +1,5 @@
 import random
-fast_food = ["5 guys/Moes", "Waffle House", "Zaxby's", "grandma's pizza", "thai"]
+fast_food = ["5 guys/Moes", "Waffle House","chinese", "grandma's pizza", "thai"]
 sit_down_food = ["McCray's", "Buff WW", "Hibachi", "Sonny's"]
 fun = ["park", "Fernbank", "sex", "Go karts", "top golf", "mall of georgia", "beltline", "atlantic station"]
 

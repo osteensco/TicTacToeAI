@@ -14,7 +14,7 @@ def get_answer():
 
 
 while True:
-    prompt = input("Do you wish to consult the spirits?")
+    prompt = input("Do you wish to consult the spirits? ")
 
     if prompt in positives:
         input("Ask the spirits your question: ")
