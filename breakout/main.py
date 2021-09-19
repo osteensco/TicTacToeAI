@@ -11,18 +11,26 @@ class Block:
         self.y = y
         self.color = color
         self.health = health
+        self.img = pygame.Surface([25, 25])
+        self.img.fill(color)
+        self.rect = self.img.get_rect()
 
     def draw(self, window):
-        pygame.draw.rect(window, self.color, rect=(self.x, self.y, 25, 25)), self.x, self.y
+        self.img.blit(self.img, window)
 
 class Paddle:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        # self.mask =
+        self.img = pygame.Surface([60, 15])
+        self.img.fill((20,20,20))
+        self.rect = self.img.get_rect()
 
     def draw(self, window):
-        pygame.draw.rect(window, (20,20,20), rect=(self.x, self.y, 60, 15)), self.x, self.y
+        self.img.blit(self.img, window)
+
+    def get_width(self):
+        return self.img.get_width()
 
 
 class Ball:
@@ -30,10 +38,14 @@ class Ball:
         self.x = x
         self.y = y
         self.fall = True
-        # self.mask = 
+        self.img = pygame.Surface([15, 15])
+        self.img.fill((20,20,20))
+        self.rect = self.img.get_rect()
 
     def draw(self, window):
-        pygame.draw.rect(window, (20,20,20), rect=(self.x, self.y, 15, 15)), self.x, self.y
+        self.img.blit(self.img, window)
+
+
 
 
 def redraw_window(objs, WINDOW):
