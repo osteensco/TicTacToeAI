@@ -1,146 +1,125 @@
 import random
-import Classes_BS
+from Classes_BS import *
 
-#board starts as empty list so user can create their own size
-board = []
-hit_enemy_ship = []
-enemies = []
-enemy_ships = 0
-_turns = 0
-board_size = 0
-#hit enemy ship list is used to track how many ships are sunk, it's then compared to total number of enemy ships (see botom) as victory condition
-
-#_____user prompts is function so it can be called by player to play again
-#_____user prompts with size limitations for each prompt______________________________________
-#_____captain will chew out player for inputting silly info
-#_____prompt defaults to minimum values if user input is too small______________________________
-def user_prompts():
-  
-  print("All hands on deck! Captain wants a status report ASAP!")
-
-  board_size = int(input("Identify range from farthest enemy ship spotted! "))
-  if board_size > 20:
-    board_size = 20
-    print("Captain: Our max weapons range is 20! Do not engage any further out!")
-  elif board_size < 2:
-    board_size = 2
-    print("Captain: They're right on top of us! Set weapons range to 2!")
-  else:
-    board_size
-
-  enemy_ships = int(input("How many enemy ships spotted? "))
-  if enemy_ships > int(board_size / 2):
-    enemy_ships = int(board_size / 2)
-    print(f"""Captain: Wipe the seasalt from your binos sailor! I only see {enemy_ships}!""")
-  elif enemy_ships < 1:
-    enemy_ships = board_size
-    print("Captain: Pull yourself together sailor! Radar shows at least one enemy ship, maybe more!")
-  else:
-    enemy_ships
-
-  _turns = int(input("How much ammunition is on hand? "))
-  if _turns > (board_size**2):
-    _turns = (board_size**2)
-    print(f"""Captain: Check again sailor! We can only carry {_turns}!""")
-  elif _turns < enemy_ships:
-    _turns = enemy_ships
-    print(f"""Captain: Check again sailor! We at least have {_turns} rounds of ammunition!""")
-
-  
-  for i in range(board_size):
-    board.append(["[]"] * board_size)
-  print_board(board)
-  run_game()
-
-#__________________________________________________________________
-#____functions______________________________________________________________
-
-def print_board(board):
-  for row in board:
-    print(' '.join(row))
-
-def random_row(board):
-  return random.randint(0, len(board) - 1)
-
-def random_col(board):
-  return random.randint(0, len(board[0]) - 1)
-
-def enemy_positions(board):
-  for coor in enemy_ship_coordinates:
-    board[coor[0]][coor[1]] = " X"
-  print_board(board)
-
-
-#functions for randomized ship sizes_____(not working)
-
-enemy_ship_anchor_points = []
-enemy_ship_coordinates = []
-
-#________________________________________________________________________________
-#_____random enemy ship generator____________________________________________________________
-
-#while loop will generate coordinates of enemy ships up until we have enough for all enemy ships, if condition ensures no repeats
-def spawn_enemies():
-  for i in range(enemy_ships):
-    while True:
-      row = random_row(board)
-      col = random_col(board)
-      anchor = (row, col)
-      if anchor not in enemy_ship_anchor_points:
-        enemy_ship_anchor_points.append(anchor)
-        break
-      else:
-        continue
-    enemy = Classes_BS.Enemy(anchor)
-    enemy.generate(board)
-    enemies.append(enemy)
-    enemy_ship_coordinates.append(enemy.coordinates)
 
 #__________________________________________________________________________
-#__gameplay placed in a loop inside function for replayability__________________________________________________
+#__gameplay function_________________________________________________
 def run_game():
-  spawn_enemies()
-  for shot in range(_turns):
-    print("hello")
-    print(str(_turns - shot) + " rounds remaining! Input coordinates and fire when ready!")
-    guess_row = int(input("Guess Row: ")) - 1
-    guess_col = int(input("Guess Col: ")) - 1
+    #reset variables from a previous game if replayed
+    enemies = []
+    enemy_ships = 0
+    _turns = 0
+    board_size = 0
 
-    guess = [guess_row, guess_col]
-#move if statement below to consolidate under the else statement
-    if board[guess_row][guess_col] == "X":
-      print("Captain: We already fired there! Don't waste any more ammo sailor!")
-    if guess in enemy_ship_coordinates and board[guess_row][guess_col] != "X":
-      print("Target target target! You sunk an enemy battleship!")
-      board[guess_row][guess_col] = "X"
-      hit_enemy_ship.append(1)
-      print_board(board)
+    print("________________________________________")
+    print("________________________________________")
+  #user sets variables
+    print("All hands on deck! Captain wants a status report ASAP!")
+    print("________________________________________")
+    board_size = int(input("\nIdentify range from farthest enemy ship spotted! "))
+    if board_size > 20:
+        board_size = 20
+        print("\nCaptain: Our max weapons range is 20! Do not engage any further out!")
+    elif board_size < 2:
+        board_size = 2
+        print("\nCaptain: They're right on top of us! Set weapons range to 2!")
     else:
-      if (guess_row > (board_size - 1)) or (guess_col > (board_size - 1)):
-        print("Captain: Weapons sighted way off course, you won't hit anything there! Don't waste any more ammo sailor!")
-      elif board[guess_row][guess_col] == " O":
-        print("Captain: We already fired there! Don't waste any more ammo sailor!")
-      else:
-        print("Miss! Recalibrate!")
-        board[guess_row][guess_col] = " O"
+        board_size
+    enemy_ships = int(input("\nHow many enemy ships spotted? "))
+    if enemy_ships > int(board_size / 2):
+        enemy_ships = int(board_size / 2)
+        print(f"""\nCaptain: Wipe the seasalt from your binos sailor! I only see {enemy_ships}!""")
+    elif enemy_ships < 1:
+        enemy_ships = board_size
+        print("\nCaptain: Pull yourself together sailor! Radar shows at least one enemy ship, maybe more!")
+    else:
+        enemy_ships
+    _turns = int(input("\nHow much ammunition is on hand? "))
+    if _turns > (board_size**2):
+        _turns = (board_size**2)
+        print(f"""\nCaptain: Check again sailor! We can only carry {_turns}!""")
+    elif _turns < enemy_ships:
+        _turns = enemy_ships
+        print(f"""\nCaptain: Check again sailor! We at least have {_turns} rounds of ammunition!""")
 
-        print_board(board)
+    #generate board
+    board = Board(board_size)
+    board.generate()
+
+    #spawn enemies
+    for i in range(enemy_ships):
+        row = random.randint(0, board_size - 1)
+        col = random.randint(0, board_size - 1)
+        anchor = (row, col)
+        if anchor not in board.enemy_ship_anchor_points:
+            board.enemy_ship_anchor_points.append(anchor)
+            enemy = Enemy(anchor)
+            enemy.generate(board.grid)
+            enemies.append(enemy)
+        else:
+            enemy_ships += 1  
+    
+    for enemy in enemies:
+        enemy.hide_position(board.grid)
+        for c in enemy.coordinates:
+            board.enemy_ship_coordinates.append(c)
 
 
-    if int(len(hit_enemy_ship)) == enemy_ships:
-      print("Captain: Outstanding! All enemy ships defeated!")
-      replay = input("Play again? y/n ")
-      if replay == "y" or replay == "Y":
-        user_prompts()
-    if shot == int(_turns-1):
-      print("________________________________________")
-      enemy_positions(board)
-      print("We're black on ammo! Retreat!")
-      replay = input("Play again? y/n ")
-      if replay == "y" or replay == "Y":
-        user_prompts()
+    while _turns > 0:
+        board.print_board()
+        print(f"""{_turns} rounds remaining! Input coordinates and fire when ready!""")
+        while True:
+            guess_row = int(input("Guess Row: ")) - 1
+            if guess_row < 0:
+                print('invalid entry, please input whole number greater than 0')
+                continue
+            guess_col = int(input("Guess Col: ")) - 1
+            if guess_col < 0:
+                print('invalid entry, please input whole number greater than 0')
+                continue
+            break
+
+        guess = (guess_row, guess_col)
+        #player fire and result logic
+        if (guess_row > (board_size - 1)) or (guess_col > (board_size - 1)):
+            print("Captain: Weapons sighted way off course, you won't hit anything there! Don't waste any more ammo sailor!")
+        elif board.grid[guess_row][guess_col] == " X" or board.grid[guess_row][guess_col] == " O":
+            print("Captain: We already fired there! Don't waste any more ammo sailor!")
+        elif guess in board.enemy_ship_coordinates:
+            print("Target! Enemy vessel hit!")
+            board.grid[guess_row][guess_col] = " X"
+            for enemy in enemies:
+                if guess not in enemy.coordinates:
+                    continue
+                else:
+                    enemy.coordinates.remove(guess)
+                    if not enemy.coordinates:
+                        enemies.remove(enemy)
+                        print("Target target target! You sunk an enemy battleship!")
+                        print(f"""{len(enemies)} enemy ships remaining!""")
+        else:
+            print("Miss! Recalibrate!")
+            board.grid[guess_row][guess_col] = " O"
+
+        if not enemies:
+            board.print_board()
+            print("Captain: Outstanding! All enemy ships defeated!")
+            return
+    
+        _turns -= 1
 
 
-user_prompts() #runs user prompts so ships will generate
+    print("________________________________________")
+    board.enemy_positions()
+    print("We're black on ammo! Retreat!")
 
+
+while True:
+    run_game()
+    replay = input("Play again? y/n ")
+    if replay == "y" or replay == "Y":
+        continue
+    else:
+        print("Thanks for playing! Exiting program..")
+        break
 #____________________________________________________________________________________________
