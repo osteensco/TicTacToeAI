@@ -1,6 +1,6 @@
 import pygame
 import os
-from classes import Background
+pygame.font.init()
 
 
 #game window and fonts
@@ -30,12 +30,6 @@ bg4_img = bg1_img
 x_adj = background.get_width()
 y_adj = background.get_height()
 quadrant = int(WIDTH/4)
-
-bg1 = Background(0, 0, bg1_img)
-bg2 = Background(x_adj, 0, bg2_img)
-bg3 = Background(0, y_adj, bg3_img)
-bg4 = Background(x_adj, y_adj, bg4_img)
-bgs = [bg1, bg2, bg3, bg4]
 
 
 #Load images

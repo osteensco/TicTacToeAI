@@ -1,9 +1,9 @@
 import pygame
 import random
-from init_game import explosions, blank, player_space_ship, player_ship_shield, yellow_laser
+from init_game import player_space_ship, player_ship_shield, yellow_laser, HEIGHT, WIDTH
 from class_dictionaries import COLOR_MAP, DROP_MAP
 from helper_functions import collide
-from main import default_mask, HEIGHT, WIDTH, laser_vel, set_enemy_power, set_FPS
+
 
 
 #______CLASSES_______________________________________________________________________________________
@@ -135,10 +135,9 @@ class Ship:
         self.max_health = health
         self.health = self.max_health
         self.ship_img = None
-        self.mask = default_mask
+        self.mask = None
         self.laser_img = None
-        self.lasers = []#lasers disappear when ship is destroyed, could change and handle like drops do
-        self.laser_vel = laser_vel
+        self.lasers = []
         self.cool_down_counter = 0
         self.drops = []
         self.assets = []
@@ -155,7 +154,6 @@ class Ship:
         self.vel = vel
         self.move_time = 0
         self.destroyed = False
-        self.enemy_power = set_enemy_power
         self.particles = []
         self.weapon_flash = True
         self.explosion_time = 0
@@ -165,7 +163,7 @@ class Ship:
         
 
 
-    def move(self, vel, parallel):#for random side-side movement included add in parallel
+    def move(self, vel, parallel, set_FPS):#for random side-side movement included add in parallel
         if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
             self.y += vel
         if not self.direction:
@@ -194,7 +192,7 @@ class Ship:
                     self.left = False
 
 
-    def explode(self, window):
+    def explode(self, window, explosions, set_FPS):
         self.explosion_time += 1
         expl = random.choice(explosions)
         window.blit(expl,
@@ -204,7 +202,7 @@ class Ship:
             window.blit(self.ship_img, (self.x, self.y))
         
 
-    def draw(self, window):
+    def draw(self, window, set_FPS):
         if not self.destroyed:
             window.blit(self.ship_img, (self.x, self.y))
         elif self.explosion_time > set_FPS / 3:
@@ -235,13 +233,13 @@ class Ship:
                     obj.health -= obj.enemy_power/2
 
 
-    def drop_(self, range_low=1, range_high=10, threshold=8):
+    def drop_(self, clear_img, range_low=1, range_high=10, threshold=8):
         if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP))) #random.choice(list(DROP_MAP)
             self.drops.append(drop)
         if self.rect == None:
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
-        self.ship_img = blank
+        self.ship_img = clear_img
         self.mask = None
         self.destroyed = True
 
@@ -300,7 +298,7 @@ class Ship:
 
 class Player(Ship):
     def __init__(self, x, y, vel, health=100):
-        super().__init__(x, y, vel, health)
+        super().__init__(x, y, vel, health, )
         self.ship_img = player_space_ship
         self.laser_img = yellow_laser
         self.default_mask = pygame.mask.from_surface(self.ship_img)
@@ -353,6 +351,7 @@ class Player(Ship):
 #______________________________________________________________________________________________________________________
 
 class Enemy(Ship):
+    enemy_power = 10
     def __init__(self, x, y, color, vel, health=100):
         super().__init__(x, y, vel, health)
         self.max_health = health
@@ -391,7 +390,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.height = self.ship_img.get_height()
         
 
-    def draw(self, window):
+    def draw(self, window, set_FPS):
         if not self.destroyed:
             window.blit(self.ship_img, (self.x, self.y))
         elif self.explosion_time > set_FPS:

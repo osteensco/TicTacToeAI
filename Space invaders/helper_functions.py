@@ -1,6 +1,3 @@
-from main import x_adj, y_adj, set_FPS, shield_base_time, shield_mask
-
-
 #helper functions
 
 
@@ -17,7 +14,7 @@ def collide(obj1, obj2):
         return False
 
 
-def dyn_background(bgs, vel):
+def dyn_background(bgs, vel, x_adj, y_adj):
     #scroll
     for b in bgs:
         b.y += vel
@@ -75,7 +72,7 @@ def fire_rate_buff(obj):
     else:
         obj.score += 1
 
-def shield_buff(obj):
+def shield_buff(obj, set_FPS, shield_base_time):
     obj.score += 5
     if obj.shield_timer <= set_FPS*8:
         obj.immune = True
@@ -85,7 +82,7 @@ def shield_buff(obj):
     else:
         obj.score += 1
 
-def butterfly_gun_buff(obj):
+def butterfly_gun_buff(obj, set_FPS):
     obj.score += 5
     if not obj.butterfly_gun:
         obj.origin_cool = obj.COOLDOWN

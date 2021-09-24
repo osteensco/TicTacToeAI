@@ -20,12 +20,11 @@ from init_game import (
     title_font,
     lost_font,
     quadrant,
-    bgs,
     background
 )
 from classes import Background, Player, Boss, Enemy
 from helper_functions import dyn_background, collide
-pygame.font.init()
+
 
 
 #General notes
@@ -33,9 +32,10 @@ pygame.font.init()
 #__.blit places something in the window. in this game WIN is our window so you'll see objects placed by WIN.blit
 
 #TO DO:
+#______make main menu, settings menu, etc into classes instead of functions (allows for save states?)
 #______make a more robust start menu with settings, etc
 #______add messages as things happen or levels/lives gained, lives lost, etc
-#______move everything into classes for better organization
+
 
 
 # variables
@@ -45,10 +45,16 @@ shield_base_time = 3
 enemy_vel = 1
 enparmove = round(enemy_vel*1.5)
 enemy_laser_vel = 4
-set_enemy_power = 10
 laser_vel = 15
 player_vel = 10
 
+
+# backgrounds
+bg1 = Background(0, 0, bg1_img)
+bg2 = Background(x_adj, 0, bg2_img)
+bg3 = Background(0, y_adj, bg3_img)
+bg4 = Background(x_adj, y_adj, bg4_img)
+bgs = [bg1, bg2, bg3, bg4]
 
 #______________________________________________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________________________
@@ -74,11 +80,7 @@ def main_loop():
     lost = False
     lost_count = 0
     transition_count = 0
-    bg1 = Background(0, 0, bg1_img)
-    bg2 = Background(x_adj, 0, bg2_img)
-    bg3 = Background(0, y_adj, bg3_img)
-    bg4 = Background(x_adj, y_adj, bg4_img)
-    bgs = [bg1, bg2, bg3, bg4]
+    
 
     def redraw_window():
         for bg in bgs:
