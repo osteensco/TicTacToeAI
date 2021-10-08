@@ -1,6 +1,14 @@
 import pygame
 import random
-from init_game import player_space_ship, player_ship_shield, yellow_laser, HEIGHT, WIDTH
+from init_game import (
+    blank,
+    explosions,
+    player_space_ship,
+    player_ship_shield,
+    yellow_laser,
+    HEIGHT,
+    WIDTH
+)
 from class_dictionaries import COLOR_MAP, DROP_MAP
 from helper_functions import collide
 
@@ -48,7 +56,7 @@ class Drop:
     def __init__(self, x, y, power):
         self.x = x
         self.y = y
-        self.effect, self.img = DROP_MAP[power]
+        self.effect, self.img, self.args = DROP_MAP[power]
         self.mask = pygame.mask.from_surface(self.img)
         self.vel = 1
         self.angle = 0
@@ -128,6 +136,8 @@ class Laser:
 
 class Ship:
     COOLDOWN = 25
+    clear_img = blank
+    boom = explosions
 
     def __init__(self, x, y, vel, health=100):
         self.x = x
@@ -192,9 +202,9 @@ class Ship:
                     self.left = False
 
 
-    def explode(self, window, explosions, set_FPS):
+    def explode(self, window, set_FPS):
         self.explosion_time += 1
-        expl = random.choice(explosions)
+        expl = random.choice(self.boom)
         window.blit(expl,
             (self.rect.centerx + random.uniform(-expl.get_width(), 0),
             self.rect.centery + random.uniform(-expl.get_height(), 0)))
@@ -208,7 +218,7 @@ class Ship:
         elif self.explosion_time > set_FPS / 3:
             window.blit(self.ship_img, (self.x, self.y))
         else:
-            self.explode(window)
+            self.explode(window, set_FPS)
         for laser in self.lasers:
             laser.draw(window)
             if not laser.moving and not laser.particles:
@@ -230,16 +240,16 @@ class Ship:
                 self.lasers.remove(laser)
             elif laser.collision(obj):
                 if not obj.immune:
-                    obj.health -= obj.enemy_power/2
+                    obj.health -= self.power/2
 
 
-    def drop_(self, clear_img, range_low=1, range_high=10, threshold=8):
+    def drop_(self, range_low=1, range_high=10, threshold=8):
         if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP))) #random.choice(list(DROP_MAP)
             self.drops.append(drop)
         if self.rect == None:
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
-        self.ship_img = clear_img
+        self.ship_img = self.clear_img
         self.mask = None
         self.destroyed = True
 
@@ -248,7 +258,7 @@ class Ship:
         for drop in self.drops:
             drop.move(vel)
             if drop.collision(obj):
-                drop.effect(obj)
+                drop.effect(obj, drop.args)
                 self.drops.remove(drop)
             if drop.off_screen(HEIGHT):
                 self.drops.remove(drop)
@@ -298,9 +308,10 @@ class Ship:
 
 class Player(Ship):
     def __init__(self, x, y, vel, health=100):
-        super().__init__(x, y, vel, health, )
+        super().__init__(x, y, vel, health)
         self.ship_img = player_space_ship
         self.laser_img = yellow_laser
+        self.laser_vel = 15
         self.default_mask = pygame.mask.from_surface(self.ship_img)
         self.mask = self.default_mask
         self.ship_shield = player_ship_shield
@@ -314,11 +325,11 @@ class Player(Ship):
         
         
 
-    def move_lasers(self, vel, objs):
+    def move_lasers(self, objs):
         self.cooldown()
         for laser in self.lasers:
             if not self.butterfly_gun:
-                laser.move(vel)
+                laser.move(-self.laser_vel)
             if self.butterfly_gun:
                 laser.butterfly_move(laser.butterfly_vel, laser.butterfly_dir)
             if laser.off_screen(HEIGHT, WIDTH):
@@ -342,8 +353,8 @@ class Player(Ship):
                                 obj.drop_(1, 2, 0)
 
 
-    def draw(self, window):
-        super().draw(window)
+    def draw(self, window, set_FPS):
+        super().draw(window, set_FPS)
         super().healthbar(window)
 
 
@@ -351,11 +362,11 @@ class Player(Ship):
 #______________________________________________________________________________________________________________________
 
 class Enemy(Ship):
-    enemy_power = 10
-    def __init__(self, x, y, color, vel, health=100):
+    def __init__(self, x, y, color, vel, health=100, enemy_power=10):
         super().__init__(x, y, vel, health)
         self.max_health = health
         self.health = self.max_health
+        self.power = enemy_power
         self.ship_img, self.laser_img = COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.weapon_flash = False
@@ -396,7 +407,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         elif self.explosion_time > set_FPS:
             window.blit(self.ship_img, (self.x, self.y))
         else:
-            self.explode(window)
+            self.explode(window, set_FPS)
         for laser in self.lasers:
             laser.draw(window)
             if not laser.moving and not laser.particles:

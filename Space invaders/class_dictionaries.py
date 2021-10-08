@@ -8,7 +8,9 @@ from init_game import (
     health_drop,
     fire_rate_drop,
     shield_drop,
-    butterfly_drop
+    butterfly_drop,
+    set_FPS,
+    shield_base_time
 )
 from helper_functions import health_buff, fire_rate_buff, shield_buff, butterfly_gun_buff
 
@@ -21,10 +23,10 @@ COLOR_MAP = {
 
 #dict connects a drop to a buff function and image, similar to how COLOR_MAP for enemies connects a color to ship and laser images
 DROP_MAP = {
-        "health": (health_buff, health_drop),
-        "fire rate": (fire_rate_buff, fire_rate_drop),
-        "shield": (shield_buff, shield_drop),
-        "butterfly gun": (butterfly_gun_buff, butterfly_drop)
+        "health": (health_buff, health_drop, ()),
+        "fire rate": (fire_rate_buff, fire_rate_drop, ()),
+        "shield": (shield_buff, shield_drop, (set_FPS, shield_base_time)),
+        "butterfly gun": (butterfly_gun_buff, butterfly_drop, set_FPS)
     }
 
 

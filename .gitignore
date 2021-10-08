@@ -1675,3 +1675,6 @@ battleship/venv/lib/python2.7/stat.pyc
 battleship/venv/lib/python2.7/types.pyc
 battleship/venv/lib/python2.7/UserDict.pyc
 battleship/venv/lib/python2.7/warnings.pyc
+Space invaders/.vscode/launch.json
+Space invaders/__pycache__/class_dictionaries.cpython-39.pyc
+Space invaders/__pycache__/classes.cpython-39.pyc

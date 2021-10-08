@@ -1,21 +1,39 @@
 
-Inventory = {'dict_title': 'Inventory', 'rope': 1, 'torch': 6, 'gold coin': 42, 'dagger': 1, 'arrow': 12}
 
-def display(thing):
-    print(thing['dict_title'])
-    thing_unique = len(thing)
-    thing_total = 0
-    for key, value in thing.items():
-        if isinstance(value, int):
-            thing_total += thing.get(key, 0)
-            print(str(value) + " " + str(key))
-        else:
-            continue
-    print("Item types: " + str(thing_unique))
-    print("Total number of item: " + str(thing_total))
+theBoard = {'top-L': 'X', 'top-M': '0', 'top-R': '0',
+            'mid-L': ' ', 'mid-M': 'X', 'mid-R': ' ',
+            'bot-L': ' ', 'bot-M': ' ', 'bot-R': ' '}
 
+winconditions =  [
+        {'top-L': 'X', 'top-M': '0', 'top-R': '0'},
+        {'mid-L': ' ', 'mid-M': 'X', 'mid-R': ' '},
+        {'bot-L': ' ', 'bot-M': ' ', 'bot-R': ' '},
+        {'top-L': 'X', 'mid-L': ' ', 'bot-L': ' '},
+        {'top-M': '0', 'mid-M': 'X', 'bot-M': ' '},
+        {'top-R': '0', 'mid-R': ' ', 'bot-R': ' '},
+        {'top-L': 'X', 'mid-M': 'X', 'bot-R': ' '},
+        {'top-R': '0', 'mid-M': 'X', 'bot-L': ' '}
+    ]
 
-display(Inventory)
-
-
+# bestscore = 0
+# move = ''
+# for k in theBoard:
+#     if theBoard[k] == ' ':
+#         count = 0
+#         for each in winconditions:
+#             if k in each:
+#                 if sum(x == player for x in each.values()) < 2:
+#                     for e in each:
+#                         if each[e] != player:
+#                             count += 1
+#                         if each[e] == turn:
+#                             count += 1
+#                     if count == bestscore:
+#                         count += sum(x == turn for x in each.values())
+#                 else:
+#                     return k
+#         if count > bestscore:
+#             bestscore = count
+#             move = k
+#         print(f'''{move}, {bestscore}''')
 

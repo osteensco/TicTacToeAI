@@ -22,6 +22,7 @@ from init_game import (
     quadrant,
     background
 )
+from class_dictionaries import COLOR_MAP, DROP_MAP
 from classes import Background, Player, Boss, Enemy
 from helper_functions import dyn_background, collide
 
@@ -45,8 +46,8 @@ shield_base_time = 3
 enemy_vel = 1
 enparmove = round(enemy_vel*1.5)
 enemy_laser_vel = 4
-laser_vel = 15
 player_vel = 10
+enemy_power = 10
 
 
 # backgrounds
@@ -71,6 +72,7 @@ def main_loop():
     enemies = []
     wave_length = 3
     scroll_vel = 2
+    enemy_power = 10
     enemy_vel = 1
     enemy_laser_vel = 4
     player_vel = 10#___variable to determine how many pixels per keystroke player moves
@@ -126,9 +128,9 @@ def main_loop():
 
 
         for enemy in enemies:
-            enemy.draw(WIN)
+            enemy.draw(WIN, set_FPS)
 
-        player.draw(WIN)
+        player.draw(WIN, set_FPS)
 
         if lost:
             lost_label = lost_font.render("GAME OVER", 1, (255, 0, 0))
@@ -140,7 +142,7 @@ def main_loop():
 #_____Game Loop_________________
     while run:
         clock.tick(FPS)#this tells the game how fast to run, set by FPS variable
-        dyn_background(bgs, scroll_vel)
+        dyn_background(bgs, scroll_vel, x_adj, y_adj)
         redraw_window()
 
         for event in pygame.event.get():
@@ -231,7 +233,7 @@ def main_loop():
                 player.lives += 1
                 enemy_vel += 1
                 enemy_laser_vel += 2
-                player.enemy_power += 10
+                enemy_power += 10
             if level % 5 == 0:
                 boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel)
                 boss.add_assets()
@@ -241,14 +243,14 @@ def main_loop():
 
             for i in range(wave_length):
                 enemy = Enemy(random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*level), 20),
-                              random.choice(list(Enemy.COLOR_MAP)), enemy_vel, player.enemy_power*10)
+                              random.choice(list(COLOR_MAP.keys())), enemy_vel, enemy_power*10, enemy_power)
                 enemies.append(enemy)
 
 
 #makes enemies move, shoot, randomizes shooting
         for enemy in enemies:
             if not enemy.destroyed:
-                enemy.move(enemy.vel, enparmove)#move method
+                enemy.move(enemy.vel, enparmove, set_FPS)#move method
             enemy.move_lasers(enemy_laser_vel, player)#move lasers after being shot method
 
             #move prompts
@@ -277,7 +279,7 @@ def main_loop():
             if not enemy.destroyed and type(enemy).__name__ != "Boss" and collide(enemy, player):
                 if not player.immune:
                     player.score -= 20
-                    player.health -= player.enemy_power
+                    player.health -= enemy.power
                     enemy.drop_()
                 if player.immune:
                     player.score += enemy.max_health*2
@@ -336,7 +338,7 @@ def main_loop():
             player.health = 100
 
 
-        player.move_lasers(-player.laser_vel, enemies)
+        player.move_lasers(enemies)
 
 
 
@@ -369,7 +371,7 @@ def main_loop():
 def main_menu():#convert to a class at some point
     main_menu_run = True
     while main_menu_run:
-        dyn_background(bgs, scroll_vel)
+        dyn_background(bgs, scroll_vel, x_adj, y_adj)
         WIN.blit(background, (0,0))
         start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         # settings_label = title_font.render("Press 's' for settings", 1, (255,255,255))
