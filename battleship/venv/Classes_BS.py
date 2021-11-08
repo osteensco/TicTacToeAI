@@ -1,4 +1,5 @@
 import random
+import tkinter as tk
 
 
 class Board:
@@ -84,3 +85,4 @@ class Enemy:
     def hide_position(self, board):
         for coor in self.coordinates:
             board[coor[0]][coor[1]] = "[]"
+

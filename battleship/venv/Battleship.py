@@ -113,13 +113,14 @@ def run_game():
     board.enemy_positions()
     print("We're black on ammo! Retreat!")
 
-
-while True:
-    run_game()
-    replay = input("Play again? y/n ")
-    if replay == "y" or replay == "Y":
-        continue
-    else:
-        print("Thanks for playing! Exiting program..")
-        break
+def play():
+    while True:
+        run_game()
+        replay = input("Play again? y/n ")
+        if replay == "y" or replay == "Y":
+            continue
+        else:
+            print("Thanks for playing! Exiting program..")
+            break
+        
 #____________________________________________________________________________________________
