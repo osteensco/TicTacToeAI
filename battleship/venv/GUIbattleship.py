@@ -5,49 +5,74 @@ import sys
 import tkinter as tk
 
 
-enemies = []
-enemy_ships = 0
-_turns = 0
-board_size = 0
+
 
 root = tk.Tk()
 root.title('Battleship GUI!')
 
 
-class Prompt():
-    pass
 
 
+class Game:
+    def __init__(self, assets) -> None:
+        self.enemies = []
+        self.enemy_ships = 0
+        self._turns = 0
+        self.board_size = 0
+        self.assets = assets
+        self.current_prompt = None
+    
+
+    def next_prompt(self, prompt):
+        self.current_prompt = prompt
 
 
+    def reset_var(self):
+        self.enemies = []
+        self.enemy_ships = 0
+        self._turns = 0
+        self.board_size = 0
 
-def set_enemyships():
+
+class Prompt:
+    def __init__(self, button, label) -> None:
+        self.button = button
+        self.label = label
+
+    
+    def activate(self, button, label):
+        button["command"] = self.button
+        label["text"] = self.label
+    
+
+        
+#make these functions methods inside of Prompt class to be able to adjust class variables by calling method
+def set_turns():
+    global _turns
+    _turns = E1.get()
+    E1.delete(0, 'end')
+    for asset in assets:
+        asset.delete(0, 'end')
+
+
+def set_enemyships(self):
     global enemy_ships
     enemy_ships = E1.get()
     E1.delete(0, 'end')
+    L1["text"]  = "How much ammunition is on hand? "
+    B1["command"] = self.set_turns
 
 
-def set_boardsize():
+def set_boardsize(self):
     global board_size
     board_size = E1.get()
     E1.delete(0, 'end')
     L1["text"] = "How many enemy ships spotted? "
-    B1["command"] = set_enemyships
+    B1["command"] = self.set_enemyships
 
 
-def test_boardsize():
-    tk.Label(root, text=f'{board_size}', pady=20, bg='#ffbf00').pack(side="right")
 
-def test_enships():
-    tk.Label(root, text=f'{enemy_ships}', pady=20, bg='#ffbf00').pack(side="right")
 
-def reset_var():
-    global board_size, enemy_ships
-    enemies = []
-    enemy_ships = 0
-    _turns = 0
-    board_size = 0
-    B1["command"] = set_boardsize
 
 
 L1 = tk.Label(root, text="Identify range from farthest enemy ship spotted! ")
