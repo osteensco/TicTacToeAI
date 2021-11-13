@@ -123,4 +123,6 @@ def play():
             print("Thanks for playing! Exiting program..")
             break
         
-#____________________________________________________________________________________________
+
+if __name__ == '__main__':
+    play()

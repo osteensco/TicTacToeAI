@@ -7,11 +7,12 @@ import tkinter as tk
 
 
 
-root = tk.Tk()
-root.title('Battleship GUI!')
 
 
 
+class MainApp:
+    def __init__(self, parent) -> None:
+        pass
 
 class Game:
     def __init__(self, assets) -> None:
@@ -82,12 +83,16 @@ E1.pack(side = "right")
 B1 = tk.Button(root, text="Respond", command=set_boardsize)
 B1.pack(side="right")
 
-testbutton = tk.Button(root, text="Test Board Size", command=test_boardsize).pack(side="right")
-tb2 = tk.Button(root, text="Test Enemy Ships", command=test_enships).pack(side="right")
-reset_test = tk.Button(root, text="Test Reset", command=reset_var).pack(side="right")
+
 #on submission, next prompt is activated. This continues until all prompts are complete and variables are set.
 
 
 #board is generated. a button is generated per [] in the board, set in grid. grid location is same as how we have lists of lists, ie grid[1][2] is row 1, column 3
+def play():
+    root = tk.Tk()
+    app = MainApp(root)
+    root.title('Battleship GUI!')
+    root.mainloop()
 
-root.mainloop()
+if __name__ == '__main__':
+    play()
