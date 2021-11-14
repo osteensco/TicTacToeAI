@@ -6,33 +6,26 @@ import tkinter as tk
 
 
 
-
-
-
 class MainApp:
     def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
+        self.gameinstance = Game()
         self.B1 = tk.Button(parent, text="Respond", command=None)
         self.L1 = tk.Label(parent, text=None)
         self.E1 = tk.Entry(parent, bd =5)
-        self.user_prompt = Prompts(self.B1, self.L1, self.E1)
-
+        self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
         self.L1.pack(side = "left")
         self.E1.pack(side = "right")
         self.B1.pack(side="right")
 
 
-
-
-
-
 class Game:
-    def __init__(self, assets) -> None:
+    def __init__(self) -> None:
         self.enemies = []
         self.enemy_ships = 0
         self._turns = 0
         self.board_size = 0
-        self.assets = assets
         self.current_prompt = None
+        self.user_prompts = None
 
 
     def set_variables(self, prompt):
@@ -47,7 +40,8 @@ class Game:
 
 
 class Prompts:#creating instance of this class should run through prompts one by one waiting on user input and clicking button to continue
-    def __init__(self, button=None, label=None, entry=None) -> None:
+    def __init__(self, game, button, label, entry) -> None:
+        self.game = game
         self.button = button
         self.label = label
         self.entry = entry
@@ -56,31 +50,31 @@ class Prompts:#creating instance of this class should run through prompts one by
         self.label["text"]  = "Identify range from farthest enemy ship spotted! "
 
 
+    def validate_response(entry):
+        pass
+
 
     def next_prompt(self, button, label):
         self.button["command"] = button
         self.label["text"] = label
 
 
-
-
-    def set_boardsize(self, game):
-        game.board_size = self.entry.get()
+    def set_boardsize(self):
+        self.game.board_size = self.entry.get()
         self.entry.delete(0, 'end')
         self.next_prompt(self.set_enemyships, "How many enemy ships spotted? ")
 
 
-    def set_enemyships(self, game):
-        game.enemy_ships = self.entry.get()
+    def set_enemyships(self):
+        self.game.enemy_ships = self.entry.get()
         self.entry.delete(0, 'end')
         self.next_prompt(self.set_turns, "How much ammunition is on hand? ")
 
 
-    def set_turns(self, game):
-        game._turns = self.entry.get()
-        self.entry.delete(0, 'end')
+    def set_turns(self):
+        self.game._turns = self.entry.get()
         for asset in self.assets:
-            asset.delete(0, 'end')
+            asset.destroy()
 
 
 
