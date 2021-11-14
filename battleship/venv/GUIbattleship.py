@@ -1,6 +1,5 @@
 import random
-from tkinter.constants import RADIOBUTTON
-from Classes_BS import *
+from Classes_BS import Board, Enemy
 import sys
 import tkinter as tk
 
@@ -11,8 +10,20 @@ import tkinter as tk
 
 
 class MainApp:
-    def __init__(self, parent) -> None:
-        pass
+    def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
+        self.B1 = tk.Button(parent, text="Respond", command=None)
+        self.L1 = tk.Label(parent, text=None)
+        self.E1 = tk.Entry(parent, bd =5)
+        self.user_prompt = Prompts(self.B1, self.L1, self.E1)
+
+        self.L1.pack(side = "left")
+        self.E1.pack(side = "right")
+        self.B1.pack(side="right")
+
+
+
+
+
 
 class Game:
     def __init__(self, assets) -> None:
@@ -22,9 +33,9 @@ class Game:
         self.board_size = 0
         self.assets = assets
         self.current_prompt = None
-    
 
-    def next_prompt(self, prompt):
+
+    def set_variables(self, prompt):
         self.current_prompt = prompt
 
 
@@ -35,56 +46,52 @@ class Game:
         self.board_size = 0
 
 
-class Prompt:
-    def __init__(self, button, label) -> None:
+class Prompts:#creating instance of this class should run through prompts one by one waiting on user input and clicking button to continue
+    def __init__(self, button=None, label=None, entry=None) -> None:
         self.button = button
         self.label = label
-
-    
-    def activate(self, button, label):
-        button["command"] = self.button
-        label["text"] = self.label
-    
-
-        
-#make these functions methods inside of Prompt class to be able to adjust class variables by calling method
-def set_turns():
-    global _turns
-    _turns = E1.get()
-    E1.delete(0, 'end')
-    for asset in assets:
-        asset.delete(0, 'end')
+        self.entry = entry
+        self.assets = [self.button, self.label, self.entry]
+        self.button["command"] = self.set_boardsize
+        self.label["text"]  = "Identify range from farthest enemy ship spotted! "
 
 
-def set_enemyships(self):
-    global enemy_ships
-    enemy_ships = E1.get()
-    E1.delete(0, 'end')
-    L1["text"]  = "How much ammunition is on hand? "
-    B1["command"] = self.set_turns
 
-
-def set_boardsize(self):
-    global board_size
-    board_size = E1.get()
-    E1.delete(0, 'end')
-    L1["text"] = "How many enemy ships spotted? "
-    B1["command"] = self.set_enemyships
+    def next_prompt(self, button, label):
+        self.button["command"] = button
+        self.label["text"] = label
 
 
 
 
+    def set_boardsize(self, game):
+        game.board_size = self.entry.get()
+        self.entry.delete(0, 'end')
+        self.next_prompt(self.set_enemyships, "How many enemy ships spotted? ")
 
 
-L1 = tk.Label(root, text="Identify range from farthest enemy ship spotted! ")
-L1.pack(side = "left")
-E1 = tk.Entry(root, bd =5)
-E1.pack(side = "right")
-B1 = tk.Button(root, text="Respond", command=set_boardsize)
-B1.pack(side="right")
+    def set_enemyships(self, game):
+        game.enemy_ships = self.entry.get()
+        self.entry.delete(0, 'end')
+        self.next_prompt(self.set_turns, "How much ammunition is on hand? ")
 
 
-#on submission, next prompt is activated. This continues until all prompts are complete and variables are set.
+    def set_turns(self, game):
+        game._turns = self.entry.get()
+        self.entry.delete(0, 'end')
+        for asset in self.assets:
+            asset.delete(0, 'end')
+
+
+
+
+
+
+
+
+
+
+
 
 
 #board is generated. a button is generated per [] in the board, set in grid. grid location is same as how we have lists of lists, ie grid[1][2] is row 1, column 3

@@ -1,5 +1,5 @@
 import random
-from Classes_BS import *
+from Classes_BS import Board, Enemy
 
 
 #__________________________________________________________________________
@@ -69,15 +69,18 @@ def run_game():
         board.print_board()
         print(f"""{_turns} rounds remaining! Input coordinates and fire when ready!""")
         while True:
-            guess_row = int(input("Guess Row: ")) - 1
-            if guess_row < 0:
-                print('invalid entry, please input whole number greater than 0')
-                continue
-            guess_col = int(input("Guess Col: ")) - 1
-            if guess_col < 0:
-                print('invalid entry, please input whole number greater than 0')
-                continue
-            break
+            try:
+                guess_row = int(input("Guess Row: ")) - 1
+                if guess_row < 0:
+                    print('invalid entry, please input whole number greater than 0')
+                    continue
+                guess_col = int(input("Guess Col: ")) - 1
+                if guess_col < 0:
+                    print('invalid entry, please input whole number greater than 0')
+                    continue
+                break
+            except ValueError:
+                print('Invalid entry, please input an integer')
 
         guess = (guess_row, guess_col)
         #player fire and result logic
@@ -117,7 +120,7 @@ def play():
     while True:
         run_game()
         replay = input("Play again? y/n ")
-        if replay == "y" or replay == "Y":
+        if replay.lower() == "y" or replay.lower() == "yes":
             continue
         else:
             print("Thanks for playing! Exiting program..")
