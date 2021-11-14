@@ -5,6 +5,29 @@ import tkinter as tk
 
 
 
+#TO DO:
+#   -set up print statements to also print in text widget located on left side of window
+#   -menu options at top of window with drop downs as needed
+#   -prompt container at top, right of text widget
+#   -board below prompt container
+
+
+#basic design concept
+#________________________________#
+#Menu----------------------------#
+#text  | Prompt Container        #
+#      |-------------------------#
+#      | Board                   #
+#      |                         #
+#      |                         #
+#      |                         #
+#      |                         #
+#--------------------------------#
+
+
+
+
+
 
 class MainApp:
     def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
