@@ -39,13 +39,25 @@ import tkinter as tk
 class MainApp:
     def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
         self.gameinstance = Game()
-        self.B1 = tk.Button(parent, text="Respond", command=None)
-        self.L1 = tk.Label(parent, text=None)
-        self.E1 = tk.Entry(parent, bd =5)
-        self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
+        self.textcon = tk.Frame(parent)
+        self.textcon.pack(expand=True, fill='both', side="left")
+        self.console = tk.Text(self.textcon, bg="black", fg="white", wrap="word")
+        self.console.pack(expand=True, fill='both')
+        self.promptcon = tk.Frame(parent)
+        self.promptcon.pack(side="top")
+        self.L1 = tk.Label(self.promptcon, text=None)
         self.L1.pack(side = "left")
+        self.E1 = tk.Entry(self.promptcon, bd=5)
         self.E1.pack(side = "right")
+        self.B1 = tk.Button(self.promptcon, text="Respond", command=None)
         self.B1.pack(side="right")
+        self.boardcon = tk.Frame(parent)
+        self.boardcon.pack(side="bottom")
+        
+        
+        self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
+
+
 
 
 class Game:
@@ -54,12 +66,7 @@ class Game:
         self.enemy_ships = 0
         self._turns = 0
         self.board_size = 0
-        self.current_prompt = None
         self.user_prompts = None
-
-
-    def set_variables(self, prompt):
-        self.current_prompt = prompt
 
 
     def reset_var(self):
