@@ -7,12 +7,19 @@ import tkinter as tk
 
 #TO DO:
 #   -set up print statements to also print in text widget located on left side of window
+#   -validate responses
+#   -class for user coordinate input (aka Class Shot)?
+#       -each shot is an object, contains coor and hit/miss status?
+#   -board generation
+#       -board is generated. a button is generated per [] in the board, set in a grid. grid location is same as how we have lists of lists, ie grid[1][2] is row 1, column 3
+
+
+
+#basic design concept:
 #   -menu options at top of window with drop downs as needed
 #   -prompt container at top, right of text widget
 #   -board below prompt container
 
-
-#basic design concept
 #________________________________#
 #Menu----------------------------#
 #text  | Prompt Container        #
@@ -111,7 +118,7 @@ class Prompts:#creating instance of this class should run through prompts one by
 
 
 
-#board is generated. a button is generated per [] in the board, set in grid. grid location is same as how we have lists of lists, ie grid[1][2] is row 1, column 3
+
 def play():
     root = tk.Tk()
     app = MainApp(root)
