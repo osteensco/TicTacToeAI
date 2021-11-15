@@ -46,7 +46,7 @@ def run_game():
     board = Board(board_size)
     board.generate()
 
-    #spawn enemies
+    #spawn enemies - MAKE ME A FUNCTION IN GAME CLASS
     for i in range(enemy_ships):
         row = random.randint(0, board_size - 1)
         col = random.randint(0, board_size - 1)
