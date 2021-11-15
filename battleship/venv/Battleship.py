@@ -11,9 +11,9 @@ def run_game():
     _turns = 0
     board_size = 0
 
+    #user sets variables
     print("________________________________________")
     print("________________________________________")
-  #user sets variables
     print("All hands on deck! Captain wants a status report ASAP!")
     print("________________________________________")
     board_size = int(input("\nIdentify range from farthest enemy ship spotted! "))

@@ -39,25 +39,33 @@ import tkinter as tk
 class MainApp:
     def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
         self.gameinstance = Game()
-        self.textcon = tk.Frame(parent)
-        self.textcon.pack(expand=True, fill='both', side="left")
-        self.console = tk.Text(self.textcon, bg="black", fg="white", wrap="word")
-        self.console.pack(expand=True, fill='both')
+        #prompt container
         self.promptcon = tk.Frame(parent)
-        self.promptcon.pack(side="top")
+        self.promptcon.pack(side='right', anchor='n')
         self.L1 = tk.Label(self.promptcon, text=None)
         self.L1.pack(side = "left")
         self.E1 = tk.Entry(self.promptcon, bd=5)
         self.E1.pack(side = "right")
         self.B1 = tk.Button(self.promptcon, text="Respond", command=None)
         self.B1.pack(side="right")
+        #board container
         self.boardcon = tk.Frame(parent)
-        self.boardcon.pack(side="bottom")
-        
-        
+        self.boardcon.pack(side='right', expand=True, fill='both')
+        #console container
+        self.textcon = tk.Frame(parent)
+        self.textcon.pack(side='left', anchor='w', expand=True, fill='both')
+        self.console = tk.Text(self.textcon, bg="black", fg="white", wrap="word")
+        self.console.pack(expand=True, fill='both')
+        self.consoleprinter = GUIConsole(self.console)
+        self.start_text()
         self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
 
 
+    def start_text(self):
+        print("________________________________________")
+        print("________________________________________")
+        print("All hands on deck! Captain wants a status report ASAP!")
+        print("________________________________________")
 
 
 class Game:
@@ -114,7 +122,13 @@ class Prompts:#creating instance of this class should run through prompts one by
             asset.destroy()
 
 
+class GUIConsole():
+    def __init__(self, printer) -> None:
+        self.printer = printer
 
+
+    def write(self, str):
+        self.printer.insert(tk.END, str)
 
 
 
@@ -129,6 +143,7 @@ class Prompts:#creating instance of this class should run through prompts one by
 def play():
     root = tk.Tk()
     app = MainApp(root)
+    sys.stdout = app.consoleprinter
     root.title('Battleship GUI!')
     root.mainloop()
 
