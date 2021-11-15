@@ -38,6 +38,7 @@ import tkinter as tk
 
 class MainApp:
     def __init__(self, parent) -> None:#tkinter functionality and flow goes in here
+        parent.title('Battleship GUI!')
         self.gameinstance = Game()
         #prompt container
         self.promptcon = tk.Frame(parent)
@@ -57,15 +58,12 @@ class MainApp:
         self.console = tk.Text(self.textcon, bg="black", fg="white", wrap="word")
         self.console.pack(expand=True, fill='both')
         self.consoleprinter = GUIConsole(self.console)
-        self.start_text()
+        sys.stdout = self.consoleprinter
+        self.gameinstance.new_game()
         self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
 
 
-    def start_text(self):
-        print("________________________________________")
-        print("________________________________________")
-        print("All hands on deck! Captain wants a status report ASAP!")
-        print("________________________________________")
+
 
 
 class Game:
@@ -82,6 +80,13 @@ class Game:
         self.enemy_ships = 0
         self._turns = 0
         self.board_size = 0
+
+    def new_game(self):
+        self.reset_var()
+        print("________________________________________")
+        print("________________________________________")
+        print("All hands on deck! Captain wants a status report ASAP!")
+        print("________________________________________")
 
 
 class Prompts:#creating instance of this class should run through prompts one by one waiting on user input and clicking button to continue
@@ -123,12 +128,16 @@ class Prompts:#creating instance of this class should run through prompts one by
 
 
 class GUIConsole():
-    def __init__(self, printer) -> None:
-        self.printer = printer
+    def __init__(self, textbox) -> None:
+        self.textbox = textbox
 
 
     def write(self, str):
-        self.printer.insert(tk.END, str)
+        self.textbox.insert('end', str)
+
+
+    def flush(self):
+        pass
 
 
 
@@ -143,8 +152,7 @@ class GUIConsole():
 def play():
     root = tk.Tk()
     app = MainApp(root)
-    sys.stdout = app.consoleprinter
-    root.title('Battleship GUI!')
+    
     root.mainloop()
 
 if __name__ == '__main__':
