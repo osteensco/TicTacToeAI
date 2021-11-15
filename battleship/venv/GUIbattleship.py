@@ -43,12 +43,7 @@ class MainApp:
         #prompt container
         self.promptcon = tk.Frame(parent)
         self.promptcon.pack(side='right', anchor='n')
-        self.L1 = tk.Label(self.promptcon, text=None)
-        self.L1.pack(side = "left")
-        self.E1 = tk.Entry(self.promptcon, bd=5)
-        self.E1.pack(side = "right")
-        self.B1 = tk.Button(self.promptcon, text="Respond", command=None)
-        self.B1.pack(side="right")
+
         #board container
         self.boardcon = tk.Frame(parent)
         self.boardcon.pack(side='right', expand=True, fill='both')
@@ -59,11 +54,15 @@ class MainApp:
         self.console.pack(expand=True, fill='both')
         self.consoleprinter = GUIConsole(self.console)
         sys.stdout = self.consoleprinter
-        self.gameinstance.new_game()
-        self.gameinstance.user_prompts = Prompts(self.gameinstance, self.B1, self.L1, self.E1)
+        self.new_game()
 
 
-
+    def new_game(self):
+        self.E1 = tk.Entry(self.promptcon, bd=5)
+        self.E1.pack(side = "left")
+        self.B1 = tk.Button(self.promptcon, text="Respond", command=None)
+        self.B1.pack(side="right")
+        self.gameinstance.new_game(self.B1, self.E1)
 
 
 class Game:
@@ -73,7 +72,7 @@ class Game:
         self._turns = 0
         self.board_size = 0
         self.user_prompts = None
-
+        self.board = None
 
     def reset_var(self):
         self.enemies = []
@@ -81,48 +80,48 @@ class Game:
         self._turns = 0
         self.board_size = 0
 
-    def new_game(self):
+    def new_game(self, buttoncommand, entry):
         self.reset_var()
         print("________________________________________")
         print("________________________________________")
         print("All hands on deck! Captain wants a status report ASAP!")
         print("________________________________________")
+        self.user_prompts = Prompts(self, buttoncommand, entry)
+        self.board = Board(self.board_size)
+        self.board.generate()
 
 
 class Prompts:#creating instance of this class should run through prompts one by one waiting on user input and clicking button to continue
-    def __init__(self, game, button, label, entry) -> None:
+    def __init__(self, game, button, entry) -> None:
         self.game = game
         self.button = button
-        self.label = label
         self.entry = entry
-        self.assets = [self.button, self.label, self.entry]
-        self.button["command"] = self.set_boardsize
-        self.label["text"]  = "Identify range from farthest enemy ship spotted! "
-
+        self.assets = [self.button, self.entry]
+        self.button["command"] = None
+        self.next_prompt(self.set_boardsize, "Identify range from farthest enemy ship spotted! ")
 
     def validate_response(entry):
         pass
 
-
     def next_prompt(self, button, label):
         self.button["command"] = button
-        self.label["text"] = label
-
+        print(label)
 
     def set_boardsize(self):
         self.game.board_size = self.entry.get()
+        print(self.game.board_size)
         self.entry.delete(0, 'end')
         self.next_prompt(self.set_enemyships, "How many enemy ships spotted? ")
 
-
     def set_enemyships(self):
         self.game.enemy_ships = self.entry.get()
+        print(self.game.enemy_ships)
         self.entry.delete(0, 'end')
         self.next_prompt(self.set_turns, "How much ammunition is on hand? ")
 
-
     def set_turns(self):
         self.game._turns = self.entry.get()
+        print(self.game._turns)
         for asset in self.assets:
             asset.destroy()
 
@@ -131,10 +130,8 @@ class GUIConsole():
     def __init__(self, textbox) -> None:
         self.textbox = textbox
 
-
     def write(self, str):
         self.textbox.insert('end', str)
-
 
     def flush(self):
         pass
@@ -152,7 +149,6 @@ class GUIConsole():
 def play():
     root = tk.Tk()
     app = MainApp(root)
-    
     root.mainloop()
 
 if __name__ == '__main__':
