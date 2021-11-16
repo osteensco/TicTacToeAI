@@ -6,7 +6,7 @@ import tkinter as tk
 
 
 #TO DO:
-#   -set up print statements to also print in text widget located on left side of window
+
 #   -validate responses
 #   -class for user coordinate input (aka Class Shot)?
 #       -each shot is an object, contains coor and hit/miss status?
@@ -43,19 +43,18 @@ class MainApp:
         #prompt container
         self.promptcon = tk.Frame(parent)
         self.promptcon.pack(side='right', anchor='n')
-
         #board container
         self.boardcon = tk.Frame(parent)
         self.boardcon.pack(side='right', expand=True, fill='both')
         #console container
         self.textcon = tk.Frame(parent)
         self.textcon.pack(side='left', anchor='w', expand=True, fill='both')
-        self.console = tk.Text(self.textcon, bg="black", fg="white", wrap="word")
+        self.console = tk.Text(self.textcon, state='disabled', bg="black", fg="white", wrap="word", width=40)
         self.console.pack(expand=True, fill='both')
         self.consoleprinter = GUIConsole(self.console)
         sys.stdout = self.consoleprinter
-        self.new_game()
-
+        self.menu = MenuBar(self, parent)
+        print("Battleship GUI!")
 
     def new_game(self):
         self.E1 = tk.Entry(self.promptcon, bd=5)
@@ -63,6 +62,28 @@ class MainApp:
         self.B1 = tk.Button(self.promptcon, text="Respond", command=None)
         self.B1.pack(side="right")
         self.gameinstance.new_game(self.B1, self.E1)
+
+
+class MenuBar:
+    def __init__(self, app, parent) -> None:
+        self.obj = tk.Menu(parent)
+        self.options = tk.Menu(self.obj, tearoff=0)
+        self.options.add_command(label="New Game", command=app.new_game)
+        self.obj.add_cascade(label="Options", menu=self.options)
+        parent.config(menu=self.obj)
+
+
+class GUIConsole():
+    def __init__(self, console) -> None:
+        self.console = console
+
+    def write(self, str):
+        self.console.configure(state='normal')
+        self.console.insert('end', str)
+        self.console.configure(state='disabled')
+
+    def flush(self):
+        pass
 
 
 class Game:
@@ -126,14 +147,8 @@ class Prompts:#creating instance of this class should run through prompts one by
             asset.destroy()
 
 
-class GUIConsole():
-    def __init__(self, textbox) -> None:
-        self.textbox = textbox
-
-    def write(self, str):
-        self.textbox.insert('end', str)
-
-    def flush(self):
+class Shoot:
+    def __init__(self) -> None:
         pass
 
 

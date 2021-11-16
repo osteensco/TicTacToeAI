@@ -15,7 +15,7 @@ class Board:
             self.grid.append(["[]"] * self.board_size)
 
 
-    def print_board(self):
+    def print_board(self):#add if not GUI logic
         print("________________________________________\n")
         for row in self.grid:
             print(' '.join(row))
