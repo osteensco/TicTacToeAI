@@ -6,7 +6,8 @@ import tkinter as tk
 
 
 #TO DO:
-
+#for loop to generate the board
+#if statements for if gui or just print to console
 #   -validate responses
 #   -class for user coordinate input (aka Class Shot)?
 #       -each shot is an object, contains coor and hit/miss status?
