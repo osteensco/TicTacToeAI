@@ -6,6 +6,8 @@ import tkinter as tk
 
 
 #TO DO:
+#in non gui implement class prompts and init game object
+#move response validation into prompt class
 #for loop to generate the board
 #if statements for if gui or just print to console
 #   -validate responses
@@ -101,6 +103,9 @@ class Game:
         self.enemy_ships = 0
         self._turns = 0
         self.board_size = 0
+
+    def spawn_enemies(self):
+        pass
 
     def new_game(self, buttoncommand, entry):
         self.reset_var()
