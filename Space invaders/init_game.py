@@ -13,6 +13,17 @@ lost_font = pygame.font.SysFont("comicsans", 100)
 title_font = pygame.font.SysFont("comicsans", 60)
 
 
+# variables
+set_FPS = 90#handle all variables like this so that they can be adjusted in settings menu?
+scroll_vel = 2
+shield_base_time = 3
+enemy_vel = 1
+enparmove = round(enemy_vel*1.5)
+enemy_laser_vel = 4
+player_vel = 10
+enemy_power = 10
+
+
 #func to load images
 def load_image(folder, image_name):
     image = pygame.image.load(os.path.join(folder, image_name))

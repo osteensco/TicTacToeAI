@@ -20,11 +20,21 @@ from init_game import (
     title_font,
     lost_font,
     quadrant,
-    background
+    background,
+    set_FPS,
+    scroll_vel,
+    shield_base_time,
+    enemy_vel,
+    enparmove,
+    enemy_laser_vel,
+    player_vel,
+    enemy_power,
 )
-from class_dictionaries import COLOR_MAP, DROP_MAP
-from classes import Background, Player, Boss, Enemy
+
 from helper_functions import dyn_background, collide
+from class_dictionaries import COLOR_MAP, DROP_MAP
+from classes import Background, Player, Boss, Enemy, Drop, Laser
+
 
 
 
@@ -38,16 +48,6 @@ from helper_functions import dyn_background, collide
 #______add messages as things happen or levels/lives gained, lives lost, etc
 
 
-
-# variables
-set_FPS = 90#handle all variables like this so that they can be adjusted in settings menu?
-scroll_vel = 2
-shield_base_time = 3
-enemy_vel = 1
-enparmove = round(enemy_vel*1.5)
-enemy_laser_vel = 4
-player_vel = 10
-enemy_power = 10
 
 
 # backgrounds
@@ -389,5 +389,5 @@ def main_menu():#convert to a class at some point
                 #     settings_menu()
     quit()
 
-
-main_menu()#starts game at main menu when game is opened
+if __name__ == '__main__':
+    main_menu()#starts game at main menu when game is opened

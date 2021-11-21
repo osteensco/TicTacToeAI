@@ -55,7 +55,7 @@ def dyn_background(bgs, vel, x_adj, y_adj):
 
 
 #drop effects as functions
-def health_buff(obj):
+def health_buff(obj, args):
     obj.score += 1
     if obj.health < obj.max_health or obj.lives > 9:
         obj.health = obj.max_health
@@ -63,7 +63,7 @@ def health_buff(obj):
         obj.lives += 1
         obj.health = 20
 
-def fire_rate_buff(obj):
+def fire_rate_buff(obj, args):
     obj.score += 1
     if obj.COOLDOWN > 5:
         obj.COOLDOWN -= 2

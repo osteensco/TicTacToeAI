@@ -415,7 +415,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         for drop in self.drops:
             drop.draw(window)
         for asset in self.assets:
-            asset.draw(window)
+            asset.draw(window, set_FPS)
 
 
     def add_assets(self):
