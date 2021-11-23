@@ -235,7 +235,7 @@ def main_loop():
                 enemy_laser_vel += 2
                 enemy_power += 10
             if level % 5 == 0:
-                boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel)
+                boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel, enemy_power*100, enemy_power)
                 boss.add_assets()
                 boss.shield_active()
                 enemies.append(boss)

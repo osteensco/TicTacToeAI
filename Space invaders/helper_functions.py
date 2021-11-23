@@ -1,3 +1,7 @@
+from init_game import (
+    set_FPS,
+    shield_base_time
+)
 #helper functions
 
 
@@ -55,7 +59,7 @@ def dyn_background(bgs, vel, x_adj, y_adj):
 
 
 #drop effects as functions
-def health_buff(obj, args):
+def health_buff(obj):
     obj.score += 1
     if obj.health < obj.max_health or obj.lives > 9:
         obj.health = obj.max_health
@@ -63,7 +67,7 @@ def health_buff(obj, args):
         obj.lives += 1
         obj.health = 20
 
-def fire_rate_buff(obj, args):
+def fire_rate_buff(obj):
     obj.score += 1
     if obj.COOLDOWN > 5:
         obj.COOLDOWN -= 2
@@ -72,7 +76,7 @@ def fire_rate_buff(obj, args):
     else:
         obj.score += 1
 
-def shield_buff(obj, set_FPS, shield_base_time):
+def shield_buff(obj):
     obj.score += 5
     if obj.shield_timer <= set_FPS*8:
         obj.immune = True
@@ -82,7 +86,7 @@ def shield_buff(obj, set_FPS, shield_base_time):
     else:
         obj.score += 1
 
-def butterfly_gun_buff(obj, set_FPS):
+def butterfly_gun_buff(obj):
     obj.score += 5
     if not obj.butterfly_gun:
         obj.origin_cool = obj.COOLDOWN

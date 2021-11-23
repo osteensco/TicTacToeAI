@@ -56,7 +56,7 @@ class Drop:
     def __init__(self, x, y, power):
         self.x = x
         self.y = y
-        self.effect, self.img, self.args = DROP_MAP[power]
+        self.effect, self.img = DROP_MAP[power]
         self.mask = pygame.mask.from_surface(self.img)
         self.vel = 1
         self.angle = 0
@@ -258,7 +258,7 @@ class Ship:
         for drop in self.drops:
             drop.move(vel)
             if drop.collision(obj):
-                drop.effect(obj, drop.args)
+                drop.effect(obj)
                 self.drops.remove(drop)
             if drop.off_screen(HEIGHT):
                 self.drops.remove(drop)
@@ -382,10 +382,11 @@ class Enemy(Ship):
 
 class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                  # randomize these matches. Keep in dict for key/values like color map?
-    def __init__(self, x, y, boss_img, asset_imgs, weapon_img, vel, health=10000):
+    def __init__(self, x, y, boss_img, asset_imgs, weapon_img, vel, health=10000, enemy_power=10):
         super().__init__(x, y, vel, health)
         self.x = x
         self.y = y
+        self.power = enemy_power * 2
         self.ship_img, self.vul_img = boss_img
         self.asset_img = asset_imgs
         self.laser_img = weapon_img
