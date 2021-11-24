@@ -23,12 +23,7 @@ from init_game import (
     background,
     set_FPS,
     scroll_vel,
-    shield_base_time,
-    enemy_vel,
     enparmove,
-    enemy_laser_vel,
-    player_vel,
-    enemy_power,
 )
 
 from helper_functions import dyn_background, collide
