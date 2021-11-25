@@ -95,3 +95,19 @@ def butterfly_gun_buff(obj):
     obj.butterfly_vel = 1
     obj.butterfly_dir = 0
     obj.butterfly_timer += set_FPS
+
+def butterfly_shoot(obj):
+    if obj.butterfly_dir >= -1:
+        if obj.butterfly_vel > 0:
+            obj.butterfly_dir += 1
+            obj.butterfly_vel -= 1
+        elif obj.butterfly_vel <= 0:
+            obj.butterfly_dir -= 1
+            obj.butterfly_vel -= 1
+    elif obj.butterfly_dir <= 0:
+        if obj.butterfly_vel < 0:
+            obj.butterfly_dir -= 1
+            obj.butterfly_vel += 1
+        elif obj.butterfly_vel >= 0:
+            obj.butterfly_dir += 1
+            obj.butterfly_vel += 1

@@ -26,9 +26,9 @@ from init_game import (
     enparmove,
 )
 
-from helper_functions import dyn_background, collide
-from class_dictionaries import COLOR_MAP, DROP_MAP
-from classes import Background, Player, Boss, Enemy, Drop, Laser
+from helper_functions import dyn_background, collide, butterfly_shoot
+from class_dictionaries import COLOR_MAP
+from classes import Background, Player, Boss, Enemy
 
 
 
@@ -188,20 +188,7 @@ def main_loop():
             player.shoot()
             if player.butterfly_gun:#put in it's own function
                 player.butterfly_timer -= 1
-                if player.butterfly_dir >= -1:
-                    if player.butterfly_vel > 0:
-                        player.butterfly_dir += 1
-                        player.butterfly_vel -= 1
-                    elif player.butterfly_vel <= 0:
-                        player.butterfly_dir -= 1
-                        player.butterfly_vel -= 1
-                elif player.butterfly_dir <= 0:
-                    if player.butterfly_vel < 0:
-                        player.butterfly_dir -= 1
-                        player.butterfly_vel += 1
-                    elif player.butterfly_vel >= 0:
-                        player.butterfly_dir += 1
-                        player.butterfly_vel += 1
+                butterfly_shoot(player)
 
 #checks if game has been lost
         if player.lives <= 0:
@@ -265,7 +252,7 @@ def main_loop():
             if enemy.destroyed:#initiates drop movement and removes enemy when drops expire/taken
                 for drop in enemy.drops:
                     enemy.move_drops(drop.vel, player)
-                if not enemy.drops:
+                if not enemy.drops and not enemy.lasers:
                     if type(enemy).__name__ != "Boss":
                         enemies.remove(enemy)
                     elif enemy.explosion_time > set_FPS:
