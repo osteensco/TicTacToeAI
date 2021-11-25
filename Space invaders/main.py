@@ -77,6 +77,7 @@ def main_loop():
     lost = False
     lost_count = 0
     transition_count = 0
+    prompt = None
     
 
     def redraw_window():
@@ -93,10 +94,15 @@ def main_loop():
         player_health_label = main_font.render(f"Shield Strength: {player.health}", 1, (0, 225, 0))
         score_label = main_font.render(f"Player Score: {player.score}", 1, (235, 0, 255))
 
+        enemy_count_label = main_font.render(f"Enemies: {len(enemies)}", 1, (255, 255, 255))
+
         WIN.blit(lives_label, (10, 10))#lives label top left corner
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))#top right corner
         WIN.blit(player_health_label, (10, lives_label.get_height() + 10))#below lives label
         WIN.blit(score_label, (WIDTH - score_label.get_width() - 10, level_label.get_height() + 10))#below level label
+        if len(enemies) > 0:
+            WIN.blit(enemy_count_label, (WIDTH - enemy_count_label.get_width() - 10,
+            level_label.get_height() + lives_label.get_height() + 10))
 
         if player.shield_timer > FPS:
             shield_label = main_font.render(f"Meta Shield: {player.shield_timer}", 1, (0, 0, 255))
@@ -121,6 +127,7 @@ def main_loop():
                 WIDTH / 2 - transition_level_label.get_width() / 2,
                 HEIGHT / 2 - transition_level_label.get_height() / 2))
 
+            
 
         for enemy in enemies:
             enemy.draw(WIN, set_FPS)
@@ -153,14 +160,14 @@ def main_loop():
                     b.x += scroll_vel*2
                 for enemy in enemies:
                     if enemy.x < WIDTH - enemy.get_width():
-                        enemy.x += scroll_vel*3
+                        enemy.x += player_vel
                     for drop in enemy.drops:
-                        drop.x += scroll_vel*3
+                        drop.x += player_vel
                     for laser in enemy.lasers:
-                        laser.x += scroll_vel*3
+                        laser.x += player_vel
                     for asset in enemy.assets:
                         for drp in asset.drops:
-                            drp.x += scroll_vel*3
+                            drp.x += player_vel
         if keys[pygame.K_d]:
             if player.x + player.get_width() < WIDTH - quadrant:  # right movement
                 player.x += player_vel
@@ -169,20 +176,20 @@ def main_loop():
                     b.x -= scroll_vel*2
                 for enemy in enemies:
                     if enemy.x > 0:
-                        enemy.x -= scroll_vel*3
+                        enemy.x -= player_vel
                     for drop in enemy.drops:
-                        drop.x -= scroll_vel*3
+                        drop.x -= player_vel
                     for laser in enemy.lasers:
-                        laser.x -= scroll_vel*3
+                        laser.x -= player_vel
                     for asset in enemy.assets:
                         for drp in asset.drops:
-                            drp.x -= scroll_vel*3
+                            drp.x -= player_vel
         if keys[pygame.K_w] and player.y > -1:  # up movement
             if player.y >= player_vel:
                 player.y -= player_vel
             else:
                 player.y -= player.y
-        if keys[pygame.K_s] and player.y + player.get_height() + 20 < HEIGHT:  # down movement, buffer for healthbar
+        if keys[pygame.K_s] and player.y + player.get_height() + 1 < HEIGHT:  # down movement, buffer for healthbar
             player.y += player_vel
         if keys[pygame.K_SPACE]:
             player.shoot()
@@ -350,11 +357,13 @@ def main_loop():
 #                 if event.key == pygame.K_RETURN:
 #                     main_menu()
 
+
 def main_menu():#convert to a class at some point
     main_menu_run = True
     while main_menu_run:
-        dyn_background(bgs, scroll_vel, x_adj, y_adj)
-        WIN.blit(background, (0,0))
+        dyn_background(bgs, scroll_vel/5, x_adj, y_adj)
+        for bg in bgs:
+            bg.draw(WIN)
         start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         # settings_label = title_font.render("Press 's' for settings", 1, (255,255,255))
         WIN.blit(start_label, (WIDTH/2 - start_label.get_width()/2, HEIGHT/2 - start_label.get_height()/2))
