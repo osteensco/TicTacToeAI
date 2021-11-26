@@ -35,21 +35,27 @@ class Particle:#circles for now, can break out into child classes for other imag
         self.y_vel = y_vel
         self.burn_time = burn_time
         self.radius = self.burn_time * 2
-        self.hitbox = hitbox
-        self.mask = None
+        
+    def draw(self, window):
+        if self.burn_time >= 0:
+            pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), int(self.burn_time))
 
 
+
+class ShieldHit(Particle):
+    def __init__(self, x, y, color, x_vel, y_vel, burn_time):
+        super().__init__(x, y, color, x_vel, y_vel, burn_time)
+
+    def absorb_effect(self, burn_rate=.01):
+        self.x += self.x_vel/4
+        self.y += self.y_vel/4
+        self.burn_time -= burn_rate
 
 
 
 class Explosion(Particle):
     def __init__(self, x, y, color, x_vel, y_vel, burn_time):
         super().__init__(x, y, color, x_vel, y_vel, burn_time)
-
-
-    def draw(self, window):
-        if self.burn_time >= 0:
-            pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), int(self.burn_time))
 
 
     def spark_effect(self, burn_rate=.05):
@@ -99,16 +105,16 @@ class Laser:
         self.mask = pygame.mask.from_surface(self.img)
         self.particles = []
         self.moving = True
-        self.firebomb = False
+        self.armed = False
+        self.exploding = False
         self.explosion_time = 0
         self.rect = None
 
     def draw(self, window):
-        if self.moving:
+        if self.moving or self.armed:
             window.blit(self.img, (self.x, self.y))
-        elif self.firebomb:
-            self.explode(window, set_FPS)
-            window.blit(self.img, (self.x, self.y))
+        elif self.exploding:
+            self.explode(window)
         if self.particles:
             for part in self.particles:
                 part.spark_effect()
@@ -132,6 +138,9 @@ class Laser:
 
     def collision(self, obj):
         if collide(self, obj):
+            if self.armed:
+                self.exploding = True
+                self.armed = False
             self.moving = False
             self.mask = None
             for i in range(0, random.randint(30, 50)):
@@ -144,19 +153,16 @@ class Laser:
                 self.particles.append(particle)
             return True
 
-    def explode(self, window, set_FPS):
+    def explode(self, window):
         if self.rect == None:
             self.rect = self.img.get_rect(topleft=(self.x, self.y))
         self.explosion_time += 1
-        expl = random.choice(self.boom)
-        self.img = expl
-        self.x = self.rect.centerx + random.uniform(-expl.get_width(), 0)
-        self.y = self.rect.centery + random.uniform(-expl.get_height(), 0)
-        self.mask = pygame.mask.from_surface(expl)
-        if self.explosion_time > set_FPS:
-            self.img = blank
-            self.firebomb = False
-            window.blit(self.img, (self.x, self.y))
+        self.img = random.choice(self.boom)
+        window.blit(self.img,
+            (self.rect.centerx + random.uniform(-self.img.get_width(), 0),
+            self.rect.centery + random.uniform(-self.img.get_height(), 0)))
+        
+        
 
 #______________________________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
@@ -422,7 +428,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.left = False
         self.right = False
         self.move_time = 0
-        self.weapon = 'firebomb'
+        self.weapon = 'mine'
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
         self.particles = []
@@ -439,8 +445,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
     def draw(self, window, set_FPS):
         self.healthbar(window)
         if not self.destroyed:
-            window.blit(self.ship_img, (self.x, self.y))
-        elif self.explosion_time > set_FPS:
             window.blit(self.ship_img, (self.x, self.y))
         else:
             self.explode(window, set_FPS)
@@ -475,7 +479,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.mask = pygame.mask.from_surface(self.ship_img)
 
 
-    def move_assets(self):#
+    def move_assets(self):
         for asset in self.assets:
             asset.x = self.x
             asset.y = self.y
@@ -487,15 +491,20 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             laser.move(vel)
             if laser.off_screen(HEIGHT, WIDTH):
                 self.lasers.remove(laser)
-            if not laser.moving and not laser.particles and not laser.firebomb:
+            if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
             if self.weapon == 'laser':
                 if laser.collision(obj) and not obj.immune:
                     obj.health -= self.power/2
-            elif self.weapon == 'firebomb':
-                if HEIGHT - 120 >= laser.y >= HEIGHT - 150:
-                    laser.firebomb = True
+            elif self.weapon == 'mine':
+                if laser.moving and HEIGHT - 50 >= laser.y >= random.randint(obj.y-75, obj.y+100):
                     laser.moving = False
+                    laser.armed = True
+                if laser.collision(obj) and not obj.immune:
+                    obj.health -= self.power
+                if laser.explosion_time > set_FPS / 3:
+                    self.lasers.remove(laser)
+
 
     def collision(self, obj):
         if collide(self, obj):

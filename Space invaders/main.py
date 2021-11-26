@@ -158,6 +158,8 @@ def main_loop():
             else:
                 for b in bgs:
                     b.x += scroll_vel*2
+                for laser in player.lasers:
+                        laser.x += player_vel
                 for enemy in enemies:
                     if enemy.x < WIDTH - enemy.get_width():
                         enemy.x += player_vel
@@ -174,6 +176,8 @@ def main_loop():
             else:
                 for b in bgs:
                     b.x -= scroll_vel*2
+                for laser in player.lasers:
+                        laser.x -= player_vel
                 for enemy in enemies:
                     if enemy.x > 0:
                         enemy.x -= player_vel
