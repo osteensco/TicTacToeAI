@@ -48,7 +48,7 @@ class ShieldHit(Particle):
         self.color = (0, 0, random.randint(60, 176)) 
         self.x_vel = random.randint(-2, 2)
         self.y_vel = random.randint(-2, 2)
-        self.burn_time = random.randint(10, 14)
+        self.burn_time = random.randint(10, 16)
 
     def spark_effect(self):
         self.x += self.x_vel
@@ -70,7 +70,6 @@ class Explosion(Particle):
         self.y += self.y_vel
         self.burn_time -= .05
     
-
 
 
 class Drop:
