@@ -27,13 +27,13 @@ class Background:
 
 
 class Particle:#circles for now, can break out into child classes for other images/shapes
-    def __init__(self, x, y, color, x_vel, y_vel, burn_time, hitbox=False):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.color = color
-        self.x_vel = x_vel
-        self.y_vel = y_vel
-        self.burn_time = burn_time
+        self.color = None
+        self.x_vel = None
+        self.y_vel = None
+        self.burn_time = 0
         self.radius = self.burn_time * 2
         
     def draw(self, window):
@@ -43,25 +43,33 @@ class Particle:#circles for now, can break out into child classes for other imag
 
 
 class ShieldHit(Particle):
-    def __init__(self, x, y, color, x_vel, y_vel, burn_time):
-        super().__init__(x, y, color, x_vel, y_vel, burn_time)
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.color = (0, 0, random.randint(60, 176)) 
+        self.x_vel = random.randint(-2, 2)
+        self.y_vel = random.randint(-2, 2)
+        self.burn_time = random.randint(10, 14)
 
-    def absorb_effect(self, burn_rate=.01):
-        self.x += self.x_vel/4
-        self.y += self.y_vel/4
-        self.burn_time -= burn_rate
+    def spark_effect(self):
+        self.x += self.x_vel
+        self.y += self.y_vel
+        self.burn_time -= .5
 
 
 
 class Explosion(Particle):
-    def __init__(self, x, y, color, x_vel, y_vel, burn_time):
-        super().__init__(x, y, color, x_vel, y_vel, burn_time)
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.color = (255, random.randint(60, 176), 0) 
+        self.x_vel = random.randint(-4, 4)
+        self.y_vel = random.randint(-4, 4)
+        self.burn_time = random.randint(2, 5)
 
-
-    def spark_effect(self, burn_rate=.05):
+    def spark_effect(self):
         self.x += self.x_vel
         self.y += self.y_vel
-        self.burn_time -= burn_rate
+        self.burn_time -= .05
+    
 
 
 
@@ -143,14 +151,14 @@ class Laser:
                 self.armed = False
             self.moving = False
             self.mask = None
-            for i in range(0, random.randint(30, 50)):
-                particle = Explosion(
-                self.x + (self.img.get_width() / 4),
-                self.y,
-                (255, random.randint(60, 176), 0), 
-                random.randint(-4, 4),
-                random.randint(-4, 4), random.randint(2, 5))
-                self.particles.append(particle)
+            if obj.immune:
+                for i in range(0, random.randint(30, 50)):
+                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)
+            else:
+                for i in range(0, random.randint(30, 50)):
+                    particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)
             return True
 
     def explode(self, window):
@@ -456,11 +464,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             drop.draw(window)
         for asset in self.assets:
             asset.draw(window, set_FPS)
-        for part in self.particles:
-            part.spark_effect(burn_rate=.50)
-            part.draw(window)
-            if part.burn_time <= 0:
-                self.particles.remove(part)
 
 
     def add_assets(self):
@@ -511,12 +514,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
     def collision(self, obj):
         if collide(self, obj):
             for i in range(0, random.randint(30, 50)):
-                particle = Explosion(
-                self.x + (self.img.get_width() / 4),
-                self.y,
-                (255, random.randint(60, 176), 0), 
-                random.randint(-4, 4),
-                random.randint(-4, 4), random.randint(2, 5))
+                particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
                 self.particles.append(particle)
             return True
 
