@@ -428,7 +428,9 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.left = False
         self.right = False
         self.move_time = 0
-        self.weapon = 'mine'
+        self.body = 'Y'# X, T
+        self.asset = 'shield'#reflector, minion spawner
+        self.weapon = 'mine'#horizontal laser, shotgun
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
         self.particles = []
@@ -489,11 +491,11 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.cooldown()
         for laser in self.lasers:
             laser.move(vel)
-            if laser.off_screen(HEIGHT, WIDTH):
-                self.lasers.remove(laser)
             if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
             if self.weapon == 'laser':
+                if laser.off_screen(HEIGHT, WIDTH):
+                    self.lasers.remove(laser)
                 if laser.collision(obj) and not obj.immune:
                     obj.health -= self.power/2
             elif self.weapon == 'mine':
@@ -502,7 +504,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                     laser.armed = True
                 if laser.collision(obj) and not obj.immune:
                     obj.health -= self.power
-                if laser.explosion_time > set_FPS / 3:
+                if laser.explosion_time > set_FPS / 3 or self.health <= 0:
                     self.lasers.remove(laser)
 
 
