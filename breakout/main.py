@@ -43,7 +43,7 @@ class Ball:
         self.rect = self.img.get_rect()
 
     def draw(self, window):
-        self.img.blit(self.img, window)
+        self.img.blit(self.img,window)
 
 
 
