@@ -160,6 +160,17 @@ class Laser:
                     self.particles.append(particle)
             return True
 
+
+        
+        
+
+
+class BossLaser(Laser):
+    def __init__(self, x, y, img):
+        super().__init__(self, x, y, img):
+        pass
+
+
     def explode(self, window):
         if self.rect == None:
             self.rect = self.img.get_rect(topleft=(self.x, self.y))
@@ -168,9 +179,6 @@ class Laser:
         window.blit(self.img,
             (self.rect.centerx + random.uniform(-self.img.get_width(), 0),
             self.rect.centery + random.uniform(-self.img.get_height(), 0)))
-        
-        
-
 #______________________________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
 
@@ -436,7 +444,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.right = False
         self.move_time = 0
         self.body = 'Y'# X, T
-        self.asset = 'shield'#reflector, minion spawner
+        self.asset = 'reflector'#shield, minion spawner
         self.weapon = 'mine'#horizontal laser, shotgun
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
