@@ -1,8 +1,11 @@
+import random
 from init_game import (
     set_FPS,
-    shield_base_time
+    shield_base_time,
+    HEIGHT,
+    WIDTH,
 )
-#helper functions
+#functions for various uses
 
 
 
@@ -97,17 +100,41 @@ def butterfly_gun_buff(obj):
     obj.butterfly_timer += set_FPS
 
 def butterfly_shoot(obj):
-    if obj.butterfly_dir >= -1:
-        if obj.butterfly_vel > 0:
-            obj.butterfly_dir += 1
-            obj.butterfly_vel -= 1
-        elif obj.butterfly_vel <= 0:
-            obj.butterfly_dir -= 1
-            obj.butterfly_vel -= 1
-    elif obj.butterfly_dir <= 0:
-        if obj.butterfly_vel < 0:
-            obj.butterfly_dir -= 1
-            obj.butterfly_vel += 1
-        elif obj.butterfly_vel >= 0:
-            obj.butterfly_dir += 1
-            obj.butterfly_vel += 1
+    for laser in obj.lasers:
+        if laser.butterfly:
+            if laser.butterfly_dir >= -1:
+                if laser.butterfly_vel > 0:
+                    laser.butterfly_dir += 1
+                    laser.butterfly_vel -= 1
+                elif laser.butterfly_vel <= 0:
+                    laser.butterfly_dir -= 1
+                    laser.butterfly_vel -= 1
+            elif laser.butterfly_dir <= 0:
+                if laser.butterfly_vel < 0:
+                    laser.butterfly_dir -= 1
+                    laser.butterfly_vel += 1
+                elif laser.butterfly_vel >= 0:
+                    laser.butterfly_dir += 1
+                    laser.butterfly_vel += 1
+
+def mine_mechanic(boss, laser, obj):
+    if laser.moving and HEIGHT - 50 >= laser.y >= random.randint(obj.y-75, obj.y+100):
+        laser.moving = False
+        laser.armed = True
+    if laser.collision(obj) and not obj.immune:
+        obj.health -= boss.power/4
+    if laser.explosion_time > set_FPS / 3 or boss.health <= 0:
+        boss.lasers.remove(laser)
+
+def laser_mechanic(boss, laser, obj):
+    if laser.off_screen(HEIGHT, WIDTH):
+        boss.lasers.remove(laser)
+    if laser.collision(obj) and not obj.immune:
+        obj.health -= boss.power/2
+
+
+def shotgun_mechanic(boss, laser, obj):
+    if laser.off_screen(HEIGHT, WIDTH):
+        boss.lasers.remove(laser)
+    if laser.collision(obj) and not obj.immune:
+        obj.health -= boss.power

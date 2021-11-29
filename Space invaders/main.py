@@ -27,7 +27,7 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP
+from class_dictionaries import COLOR_MAP, BOSS_WEAPON_MAP
 from classes import Background, Player, Boss, Enemy
 
 
@@ -227,16 +227,22 @@ def main_loop():
                 enemy_vel += 1
                 enemy_laser_vel += 2
                 enemy_power += 10
-            if level % 5 == 0:
-                boss = Boss(500, (-1500-(100*level)), boss_0, boss_0_asset, boss_weapon_0, enemy_vel, enemy_power*100, enemy_power)
+            if level % 1 == 0:
+                boss = Boss(
+                500, (-1500-(100*level)),
+                boss_0, boss_0_asset, random.choice(list(BOSS_WEAPON_MAP)),
+                enemy_vel, enemy_power*100, enemy_power
+                )
                 boss.add_assets()
                 boss.shield_active()
                 enemies.append(boss)
             transition_count = 0
 
             for i in range(wave_length):
-                enemy = Enemy(random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*level), 20),
-                              random.choice(list(COLOR_MAP.keys())), enemy_vel, enemy_power*10, enemy_power)
+                enemy = Enemy(
+                random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*level), 20),
+                random.choice(list(COLOR_MAP)), enemy_vel, enemy_power*10, enemy_power
+                )
                 enemies.append(enemy)
 
 
@@ -316,17 +322,14 @@ def main_loop():
                 player.mask = player.default_mask
                 player.immune = False
 
-        if player.butterfly_gun:
-            player.laser_img = random.choice(butterfly_lasers)
+        if player.butterfly_gun and player.butterfly_timer == 0:
+            player.butterfly_gun = False
+            player.COOLDOWN = player.origin_cool
+            player.butterfly_dir = 0
+            player.butterfly_vel = player.laser_vel
+            player.laser_img = yellow_laser
 
-            if player.butterfly_timer == 0:
-                player.butterfly_gun = False
-                player.COOLDOWN = player.origin_cool
-                player.butterfly_dir = 0
-                player.butterfly_vel = player.laser_vel
-                player.laser_img = yellow_laser
-
-        if player.health <= 0:#player health track (shields, w/e)
+        if player.health <= 0:#player health track (aka "shield strength")
             player.lives -= 1
             player.health = 100
 

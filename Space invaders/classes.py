@@ -6,11 +6,13 @@ from init_game import (
     player_space_ship,
     player_ship_shield,
     yellow_laser,
+    butterfly_lasers,
+    enemy_laser_vel,
     set_FPS,
     HEIGHT,
     WIDTH
 )
-from class_dictionaries import COLOR_MAP, DROP_MAP
+from class_dictionaries import COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
 from helper_functions import collide
 
 
@@ -102,26 +104,27 @@ class Drop:
 #______________________________________________________________________________________________________________________
 
 class Laser:
-    boom = explosions
-    def __init__(self, x, y, butterfly_vel, butterfly_dir, img):
+    def __init__(self, shooter, x, y, img, butterfly=False):
+        self.shooter = shooter
+        self.butterfly = butterfly
         self.x = x
         self.y = y
-        self.butterfly_dir = butterfly_dir
-        self.butterfly_vel = butterfly_vel
         self.img = img
         self.mask = pygame.mask.from_surface(self.img)
         self.particles = []
         self.moving = True
-        self.armed = False
-        self.exploding = False
-        self.explosion_time = 0
-        self.rect = None
+        self.butterfly_dir, self.butterfly_vel = self.butterfly_stats()
+    
+
+    def butterfly_stats(self):
+        if self.butterfly:
+            return self.shooter.butterfly_dir, self.shooter.butterfly_vel
+        else:
+            return None, None
 
     def draw(self, window):
-        if self.moving or self.armed:
+        if self.moving:
             window.blit(self.img, (self.x, self.y))
-        elif self.exploding:
-            self.explode(window)
         if self.particles:
             for part in self.particles:
                 part.spark_effect()
@@ -145,31 +148,68 @@ class Laser:
 
     def collision(self, obj):
         if collide(self, obj):
-            if self.armed:
-                self.exploding = True
-                self.armed = False
             self.moving = False
             self.mask = None
-            if obj.immune:
-                for i in range(0, random.randint(30, 50)):
-                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
-                    self.particles.append(particle)
-            else:
+            if not obj.immune:
                 for i in range(0, random.randint(30, 50)):
                     particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
                     self.particles.append(particle)
+            else:
+                for i in range(0, random.randint(30, 50)):
+                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)  
             return True
 
 
         
         
-
-
 class BossLaser(Laser):
-    def __init__(self, x, y, img):
-        super().__init__(self, x, y, img):
-        pass
+    def __init__(self, shooter, x, y, img):
+        super().__init__(shooter, x, y, img)
+        self.shooter = shooter
+        self.img = img
+        self.armed = False
+        self.boom = explosions
+        self.exploding = False
+        self.explosion_time = 0
+        self.rect = None
+        self.angle = 0
 
+    def img_rotate(self, img, angle):
+        self.angle += enemy_laser_vel
+        return pygame.transform.rotozoom(img, angle, 1)
+
+    def draw(self, window):
+        if self.moving or self.armed:
+            if self.shooter.weapon != 'laser':
+                window.blit(self.img, (self.x, self.y))
+            else:
+                window.blit(self.img_rotate(self.img, self.angle), (self.x, self.y))
+        elif self.exploding:
+            self.explode(window)
+        if self.particles:
+            for part in self.particles:
+                part.spark_effect()
+                part.draw(window)
+                if part.burn_time <= 0:
+                    self.particles.remove(part)
+
+    def collision(self, obj):
+        if collide(self, obj):
+            if self.armed:
+                self.exploding = True
+                self.armed = False
+            self.moving = False
+            self.mask = None
+            if not obj.immune:
+                for i in range(0, random.randint(30, 50)):
+                    particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)
+            else:
+                for i in range(0, random.randint(30, 50)):
+                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)    
+            return True
 
     def explode(self, window):
         if self.rect == None:
@@ -213,7 +253,6 @@ class Ship:
         self.move_time = 0
         self.destroyed = False
         self.particles = []
-        self.weapon_flash = True
         self.explosion_time = 0
         self.width = 0
         self.height = 0
@@ -288,7 +327,7 @@ class Ship:
 
     def drop_(self, range_low=1, range_high=10, threshold=8):
         if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
-            drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP))) #random.choice(list(DROP_MAP)
+            drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
         if self.rect == None:
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
@@ -315,15 +354,28 @@ class Ship:
 
 
     def shoot(self):
-        if self.cool_down_counter == 0:
-            laser = Laser(self.laser_pos(), self.y, self.butterfly_vel,
-                          self.butterfly_dir, self.laser_img)
+        if self.y >= 0 and self.cool_down_counter == 0:
+            if not self.butterfly_gun:
+                laser = Laser(self, self.laser_pos(), self.y, self.laser_img)
+            else:
+                laser = Laser(self, self.laser_pos(), self.y, random.choice(butterfly_lasers), butterfly=True)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
 
     def collision(self, obj):
-        return collide(self, obj)
+        if collide(self, obj):
+            if not self.immune:
+                for i in range(0, random.randint(30, 50)):
+                    particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)
+            else:
+                for i in range(0, random.randint(30, 50)):
+                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
+                    self.particles.append(particle)
+            return True
+
+
 
 
     def laser_pos(self):
@@ -371,9 +423,9 @@ class Player(Ship):
     def move_lasers(self, objs):
         self.cooldown()
         for laser in self.lasers:
-            if not self.butterfly_gun:
+            if not laser.butterfly:
                 laser.move(-self.laser_vel)
-            if self.butterfly_gun:
+            if laser.butterfly:
                 laser.butterfly_move()
             if laser.off_screen(HEIGHT, WIDTH):
                 self.lasers.remove(laser)
@@ -417,7 +469,6 @@ class Enemy(Ship):
         self.power = enemy_power
         self.ship_img, self.laser_img = COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
-        self.weapon_flash = False
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
         
@@ -428,14 +479,13 @@ class Enemy(Ship):
 
 class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                  # randomize these matches. Keep in dict for key/values like color map?
-    def __init__(self, x, y, boss_img, asset_imgs, weapon_img, vel, health=10000, enemy_power=10):
+    def __init__(self, x, y, boss_img, asset_imgs, weapon, vel, health=10000, enemy_power=10):
         super().__init__(x, y, vel, health)
         self.x = x
         self.y = y
         self.power = enemy_power * 2
         self.ship_img, self.vul_img = boss_img
         self.asset_img = asset_imgs
-        self.laser_img = weapon_img
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
         self.health = self.max_health
@@ -443,12 +493,12 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.left = False
         self.right = False
         self.move_time = 0
-        self.body = 'Y'# X, T
+        self.color = 'R'#'B', 'G'
         self.asset = 'reflector'#shield, minion spawner
-        self.weapon = 'mine'#horizontal laser, shotgun
+        self.weapon = weapon
+        self.weapon_mechanic, self.laser_img = BOSS_WEAPON_MAP[weapon]
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
-        self.particles = []
         
 
     def healthbar(self, window):
@@ -497,33 +547,20 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             asset.y = self.y
 
 
+    def shoot(self):
+        if self.y >= 0 and self.cool_down_counter == 0:
+            laser = BossLaser(self, self.laser_pos(), self.y, self.laser_img)
+            self.lasers.append(laser)
+            self.cool_down_counter = 1
+
+
     def move_lasers(self, vel, obj):
         self.cooldown()
         for laser in self.lasers:
             laser.move(vel)
             if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
-            if self.weapon == 'laser':
-                if laser.off_screen(HEIGHT, WIDTH):
-                    self.lasers.remove(laser)
-                if laser.collision(obj) and not obj.immune:
-                    obj.health -= self.power/2
-            elif self.weapon == 'mine':
-                if laser.moving and HEIGHT - 50 >= laser.y >= random.randint(obj.y-75, obj.y+100):
-                    laser.moving = False
-                    laser.armed = True
-                if laser.collision(obj) and not obj.immune:
-                    obj.health -= self.power
-                if laser.explosion_time > set_FPS / 3 or self.health <= 0:
-                    self.lasers.remove(laser)
-
-
-    def collision(self, obj):
-        if collide(self, obj):
-            for i in range(0, random.randint(30, 50)):
-                particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
-                self.particles.append(particle)
-            return True
+            self.weapon_mechanic(self, laser, obj)
 
 
 

@@ -71,6 +71,8 @@ boss_0_asset_4 = load_image("assets", "boss_0_asset_4.png")
 boss_0_asset_5 = load_image("assets", "boss_0_asset_5.png")
 boss_0_asset = [boss_0_asset_1, boss_0_asset_2, boss_0_asset_3, boss_0_asset_4, boss_0_asset_5]
 boss_weapon_0 = load_image("assets", "boss_weapon_0.png")
+boss_weapon_1 = load_image("assets", "boss_weapon_1.png")
+boss_weapon_2 = load_image("assets", "boss_weapon_2.png")
 
 #player ship
 player_space_ship = load_image("assets", "pixel_ship_yellow.png")
