@@ -12,7 +12,7 @@ from init_game import (
     HEIGHT,
     WIDTH
 )
-from class_dictionaries import COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
+from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
 from helper_functions import collide
 
 
@@ -104,9 +104,10 @@ class Drop:
 #______________________________________________________________________________________________________________________
 
 class Laser:
-    def __init__(self, shooter, x, y, img, butterfly=False):
+    def __init__(self, shooter, x, y, vel, img, butterfly=False):
         self.shooter = shooter
         self.butterfly = butterfly
+        self.vel = vel
         self.x = x
         self.y = y
         self.img = img
@@ -227,7 +228,7 @@ class Ship:
     clear_img = blank
     boom = explosions
 
-    def __init__(self, x, y, vel, health=100):
+    def __init__(self, x, y, vel, laser_vel, health=100):
         self.x = x
         self.y = y
         self.max_health = health
@@ -250,6 +251,7 @@ class Ship:
         self.left = False
         self.right = False
         self.vel = vel
+        self.laser_vel = enemy_laser_vel
         self.move_time = 0
         self.destroyed = False
         self.particles = []
@@ -314,10 +316,10 @@ class Ship:
             drop.draw(window)
 
 
-    def move_lasers(self, vel, obj):
+    def move_lasers(self, obj):
         self.cooldown()
         for laser in self.lasers:
-            laser.move(vel)
+            laser.move(self.laser_vel)
             if laser.off_screen(HEIGHT, WIDTH):
                 self.lasers.remove(laser)
             elif laser.collision(obj):
@@ -356,9 +358,9 @@ class Ship:
     def shoot(self):
         if self.y >= 0 and self.cool_down_counter == 0:
             if not self.butterfly_gun:
-                laser = Laser(self, self.laser_pos(), self.y, self.laser_img)
+                laser = Laser(self, self.laser_pos(), self.y, self.laser_vel, self.laser_img)
             else:
-                laser = Laser(self, self.laser_pos(), self.y, random.choice(butterfly_lasers), butterfly=True)
+                laser = Laser(self, self.laser_pos(), self.y, self.laser_vel, random.choice(butterfly_lasers), butterfly=True)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -374,8 +376,6 @@ class Ship:
                     particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
                     self.particles.append(particle)
             return True
-
-
 
 
     def laser_pos(self):
@@ -435,7 +435,9 @@ class Player(Ship):
                 for obj in objs:
                     if type(obj).__name__ == "Boss":
                         for asset in obj.assets:
-                            if laser.collision(asset) and not asset.destroyed:
+                            if obj.asset == "reflector" and laser.collision(asset):
+                                laser.vel = -laser.vel
+                            elif laser.collision(asset) and not asset.destroyed:
                                 asset.health -= 10
                                 if asset.health <= 0:
                                     asset.drop_(1, 2, 0)
@@ -479,26 +481,30 @@ class Enemy(Ship):
 
 class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                  # randomize these matches. Keep in dict for key/values like color map?
-    def __init__(self, x, y, boss_img, asset_imgs, weapon, vel, health=10000, enemy_power=10):
+    def __init__(self, x, y, color, asset, weapon, vel, health=10000, enemy_power=10):
         super().__init__(x, y, vel, health)
         self.x = x
         self.y = y
         self.power = enemy_power * 2
-        self.ship_img, self.vul_img = boss_img
-        self.asset_img = asset_imgs
+        self.color = color
+        self.ship_img, self.shieldup_img = BOSS_COLOR_MAP[color]
+        self.asset = asset
+        self.asset_mechanics, self.asset_img = BOSS_ASSET_MAP[asset]
+        self.weapon = weapon
+        self.weapon_mechanic, self.laser_img = BOSS_WEAPON_MAP[weapon]
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
         self.health = self.max_health
+        self.asset_health = self.max_health / 10
+        self.asset_spawn_rate = 0
         self.direction = True
         self.left = False
         self.right = False
         self.move_time = 0
-        self.color = 'R'#'B', 'G'
-        self.asset = 'reflector'#shield, minion spawner
-        self.weapon = weapon
-        self.weapon_mechanic, self.laser_img = BOSS_WEAPON_MAP[weapon]
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
+        self.add_assets()
+        self.asset_mechanics(self)
         
 
     def healthbar(self, window):
@@ -511,8 +517,10 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
     def draw(self, window, set_FPS):
         self.healthbar(window)
-        if not self.destroyed:
+        if not self.destroyed and not self.immune:
             window.blit(self.ship_img, (self.x, self.y))
+        elif not self.destroyed and self.immune:
+            window.blit(self.shieldup_img, (self.x, self.y))
         else:
             self.explode(window, set_FPS)
         for laser in self.lasers:
@@ -525,16 +533,12 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
     def add_assets(self):
         for i in range(len(self.asset_img)):
-            asset = Ship(self.x, self.y, self.max_health / 10)
+            asset = Ship(self.x, self.y, self.asset_health)
             asset.ship_img = self.asset_img[i]
             asset.mask = pygame.mask.from_surface(self.asset_img[i])
             self.assets.append(asset)
 
-
-    def shield_active(self):
-        self.immune = True
-
-
+        
     def shield_down(self):
         self.immune = False
         self.ship_img = self.vul_img
@@ -554,13 +558,17 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             self.cool_down_counter = 1
 
 
-    def move_lasers(self, vel, obj):
+    def move_lasers(self, obj):
         self.cooldown()
         for laser in self.lasers:
-            laser.move(vel)
+            laser.move(self.laser_vel)
             if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
             self.weapon_mechanic(self, laser, obj)
+        if self.asset == "drone":
+            self.asset_spawn_rate -= 1
+            if self.asset_spawn_rate <= 0:
+                pass#spawn drones here, add self.minions = [], set logic to account for asset destruction
 
 
 

@@ -12,6 +12,11 @@ from init_game import (
     boss_weapon_0,
     boss_weapon_1,
     boss_weapon_2,
+    boss_0_shield,
+    boss_0_flect,
+    boss_0_drone,
+    boss_0,
+    boss_0_0,
     
 )
 from helper_functions import (
@@ -22,6 +27,9 @@ from helper_functions import (
     mine_mechanic,
     laser_mechanic,
     shotgun_mechanic,
+    shield_mechanics,
+    reflector_mechanics,
+    drone_mechanics,
 
 )
 
@@ -46,4 +54,14 @@ BOSS_WEAPON_MAP = {
     "mine": (mine_mechanic, boss_weapon_0),
     "laser": (laser_mechanic, boss_weapon_1),
     "shotgun": (shotgun_mechanic, boss_weapon_2),
+}
+
+BOSS_ASSET_MAP = {
+    "shield": (shield_mechanics, boss_0_shield),
+    "reflector": (reflector_mechanics, boss_0_flect),
+    "drone": (drone_mechanics, boss_0_drone),
+}
+
+BOSS_COLOR_MAP = {
+    "green": (boss_0, boss_0_0),
 }

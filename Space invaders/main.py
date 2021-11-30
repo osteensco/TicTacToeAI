@@ -2,17 +2,13 @@ import pygame
 import random
 from init_game import (
     player_space_ship,
-    boss_0,
-    boss_0_asset,
-    boss_weapon_0,
-    butterfly_lasers,
     yellow_laser,
     WIDTH,
     HEIGHT,
-    bg1_img,
     x_adj,
-    bg2_img,
     y_adj,
+    bg1_img,
+    bg2_img,
     bg3_img,
     bg4_img,
     WIN,
@@ -27,7 +23,7 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_WEAPON_MAP
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_ASSET_MAP, BOSS_WEAPON_MAP
 from classes import Background, Player, Boss, Enemy
 
 
@@ -230,11 +226,11 @@ def main_loop():
             if level % 1 == 0:
                 boss = Boss(
                 500, (-1500-(100*level)),
-                boss_0, boss_0_asset, random.choice(list(BOSS_WEAPON_MAP)),
+                random.choice(list(BOSS_COLOR_MAP)),
+                random.choice(list(BOSS_ASSET_MAP)),
+                random.choice(list(BOSS_WEAPON_MAP)),
                 enemy_vel, enemy_power*100, enemy_power
                 )
-                boss.add_assets()
-                boss.shield_active()
                 enemies.append(boss)
             transition_count = 0
 
@@ -250,7 +246,7 @@ def main_loop():
         for enemy in enemies:
             if not enemy.destroyed:
                 enemy.move(enemy.vel, enparmove, set_FPS)#move method
-            enemy.move_lasers(enemy_laser_vel, player)#move lasers after being shot method
+            enemy.move_lasers(player)#move lasers after being shot method
 
             #move prompts
             if enemy.y < 0:#will move down
@@ -288,7 +284,7 @@ def main_loop():
                 if not enemy.destroyed and collide(enemy, player):
                     if not player.immune:
                         player.score -= 20
-                        player.health -= 5
+                        player.health -= 1
                     if player.immune:
                         enemy.health -= 1
                         if enemy.health <= 0:
@@ -304,7 +300,7 @@ def main_loop():
                         if not asset.destroyed and collide(asset, player):
                             if not player.immune:
                                 player.score -= 20
-                                player.health -= 5
+                                player.health -= 1
                             else:
                                 asset.health -= 10
                                 if asset.health <= 0:

@@ -61,15 +61,23 @@ blank = load_image("assets", "blank.png")
 
 
 #boss stuff
-boss_vul = load_image("assets", "boss_0.png")
-boss_invul = load_image("assets", "boss_0_0.png")
-boss_0 = [boss_invul, boss_vul]
-boss_0_asset_1 = load_image("assets", "boss_0_asset_1.png")
-boss_0_asset_2 = load_image("assets", "boss_0_asset_2.png")
-boss_0_asset_3 = load_image("assets", "boss_0_asset_3.png")
-boss_0_asset_4 = load_image("assets", "boss_0_asset_4.png")
-boss_0_asset_5 = load_image("assets", "boss_0_asset_5.png")
-boss_0_asset = [boss_0_asset_1, boss_0_asset_2, boss_0_asset_3, boss_0_asset_4, boss_0_asset_5]
+boss_0 = load_image("assets", "boss_0.png")
+boss_0_0 = load_image("assets", "boss_0_0.png")
+boss_0 = [boss_0_0, boss_0]
+boss_0_shield_0 = load_image("assets", "boss_0_shield_0.png")
+boss_0_shield_1 = load_image("assets", "boss_0_shield_1.png")
+boss_0_shield_2 = load_image("assets", "boss_0_shield_2.png")
+boss_0_shield_3 = load_image("assets", "boss_0_shield_3.png")
+boss_0_shield_4 = load_image("assets", "boss_0_shield_4.png")
+boss_0_shield = [boss_0_shield_0, boss_0_shield_1, boss_0_shield_2, boss_0_shield_3, boss_0_shield_4]
+boss_0_flect_0 = load_image("assets", "boss_0_flect_0.png")
+boss_0_flect_1 = load_image("assets", "boss_0_flect_1.png")
+boss_0_flect_2 = load_image("assets", "boss_0_flect_2.png")
+boss_0_flect_3 = load_image("assets", "boss_0_flect_3.png")
+boss_0_flect = [boss_0_flect_0, boss_0_flect_1, boss_0_flect_2, boss_0_flect_3]
+boss_0_drone_0 = load_image("assets", "boss_0_drone_0.png")
+boss_0_drone_1 = load_image("assets", "boss_0_drone_1.png")
+boss_0_drone = [boss_0_drone_0, boss_0_drone_1]
 boss_weapon_0 = load_image("assets", "boss_weapon_0.png")
 boss_weapon_1 = load_image("assets", "boss_weapon_1.png")
 boss_weapon_2 = load_image("assets", "boss_weapon_2.png")
