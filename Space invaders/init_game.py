@@ -61,6 +61,7 @@ blank = load_image("assets", "blank.png")
 
 
 #boss stuff
+drone_img = load_image("assets", "boss_minion.png")
 boss_0 = load_image("assets", "boss_0.png")
 boss_0_0 = load_image("assets", "boss_0_0.png")
 boss_0 = [boss_0_0, boss_0]

@@ -24,7 +24,7 @@ from init_game import (
 
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_ASSET_MAP, BOSS_WEAPON_MAP
-from classes import Background, Player, Boss, Enemy
+from classes import Background, Player, Boss, Enemy, Ship
 
 
 
@@ -227,7 +227,7 @@ def main_loop():
                 boss = Boss(
                 500, (-1500-(100*level)),
                 random.choice(list(BOSS_COLOR_MAP)),
-                random.choice(list(BOSS_ASSET_MAP)),
+                random.choice(list(BOSS_ASSET_MAP["assets"])),
                 random.choice(list(BOSS_WEAPON_MAP)),
                 enemy_vel, enemy_power*100, enemy_power
                 )
@@ -291,6 +291,14 @@ def main_loop():
                             enemy.drop_()
                 enemy.move_assets()
                 if enemy.assets:
+                    if enemy.asset_type == "drone":
+                        enemy.asset_spawn_rate -= 1
+                        if enemy.asset_spawn_rate <= 0:
+                            drone = Ship(enemy.x, enemy.y, enemy.power/4)
+                            drone.ship_img = enemy.drone_img
+                            drone.mask = pygame.mask.from_surface(drone.ship_img)
+                            enemies.append(drone)
+                            enemy.asset_mechanic(enemy)
                     for asset in enemy.assets:
                         if asset.destroyed:
                             for drop in asset.drops:

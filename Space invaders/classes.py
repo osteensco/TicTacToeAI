@@ -6,6 +6,7 @@ from init_game import (
     player_space_ship,
     player_ship_shield,
     yellow_laser,
+    drone_img,
     butterfly_lasers,
     enemy_laser_vel,
     set_FPS,
@@ -437,7 +438,7 @@ class Player(Ship):
                         for asset in obj.assets:
                             if obj.asset == "reflector" and laser.collision(asset):
                                 laser.vel = -laser.vel
-                            elif laser.collision(asset) and not asset.destroyed:
+                            if laser.collision(asset) and not asset.destroyed:
                                 asset.health -= 10
                                 if asset.health <= 0:
                                     asset.drop_(1, 2, 0)
@@ -488,21 +489,23 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.power = enemy_power * 2
         self.color = color
         self.ship_img, self.shieldup_img = BOSS_COLOR_MAP[color]
-        self.asset = asset
-        self.asset_mechanics, self.asset_img = BOSS_ASSET_MAP[asset]
+        self.asset_type = asset
+        self.asset_mechanic, self.asset_img = BOSS_ASSET_MAP[color][asset]
         self.weapon = weapon
         self.weapon_mechanic, self.laser_img = BOSS_WEAPON_MAP[weapon]
-        self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
         self.health = self.max_health
         self.asset_health = self.max_health / 10
         self.asset_spawn_rate = 0
+        self.minions = []
+        self.drone_img = drone_img
         self.direction = True
         self.left = False
         self.right = False
         self.move_time = 0
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
+        self.mask = pygame.mask.from_surface(self.ship_img)
         self.add_assets()
         self.asset_mechanics(self)
         
@@ -565,10 +568,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
             self.weapon_mechanic(self, laser, obj)
-        if self.asset == "drone":
-            self.asset_spawn_rate -= 1
-            if self.asset_spawn_rate <= 0:
-                pass#spawn drones here, add self.minions = [], set logic to account for asset destruction
+        
 
 
 

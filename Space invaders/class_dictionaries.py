@@ -27,9 +27,9 @@ from helper_functions import (
     mine_mechanic,
     laser_mechanic,
     shotgun_mechanic,
-    shield_mechanics,
-    reflector_mechanics,
-    drone_mechanics,
+    shield_mechanic,
+    reflector_mechanic,
+    drone_mechanic,
 
 )
 
@@ -57,9 +57,16 @@ BOSS_WEAPON_MAP = {
 }
 
 BOSS_ASSET_MAP = {
-    "shield": (shield_mechanics, boss_0_shield),
-    "reflector": (reflector_mechanics, boss_0_flect),
-    "drone": (drone_mechanics, boss_0_drone),
+    "assets": [
+        "shield",
+        "reflector",
+        "drone",
+    ],
+    "green": {
+        "shield": (shield_mechanic, boss_0_shield),
+        "reflector": (reflector_mechanic, boss_0_flect),
+        "drone": (drone_mechanic, boss_0_drone),
+    },
 }
 
 BOSS_COLOR_MAP = {

@@ -141,16 +141,16 @@ def shotgun_mechanic(boss, laser, obj):
         obj.health -= boss.power
 
 
-def shield_mechanics(boss):
+def shield_mechanic(boss):
     boss.immune = True
     pygame.mask.from_surface(boss.shieldup_img)
 
 
-def reflector_mechanics(boss):
+def reflector_mechanic(boss):
     boss.asset_health = boss.max_health * 1.5
 
 
-def drone_mechanics(boss):
+def drone_mechanic(boss):
     boss.asset_health = boss.max_health / 100
     boss.asset_spawn_rate = (60 * set_FPS) / boss.power
 
