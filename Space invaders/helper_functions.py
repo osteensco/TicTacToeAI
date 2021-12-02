@@ -3,6 +3,8 @@ import pygame
 from init_game import (
     set_FPS,
     shield_base_time,
+    drone_img,
+    drone_laser_img,
     HEIGHT,
     WIDTH,
 )
@@ -75,8 +77,8 @@ def fire_rate_buff(obj):
     obj.score += 1
     if obj.COOLDOWN > 5:
         obj.COOLDOWN -= 2
-    if obj.COOLDOWN % 5 == 0 and obj.laser_vel < 25:
-        obj.laser_vel += 1
+    if obj.COOLDOWN % 5 == 0 and obj.laser_vel >= -25:
+        obj.laser_vel -= 1
     else:
         obj.score += 1
 
@@ -128,17 +130,24 @@ def mine_mechanic(boss, laser, obj):
         boss.lasers.remove(laser)
 
 def laser_mechanic(boss, laser, obj):
+    laser.vel += 1
     if laser.off_screen(HEIGHT, WIDTH):
         boss.lasers.remove(laser)
     if laser.collision(obj) and not obj.immune:
         obj.health -= boss.power/2
+        boss.lasers.remove(laser)
 
 
 def shotgun_mechanic(boss, laser, obj):
     if laser.off_screen(HEIGHT, WIDTH):
         boss.lasers.remove(laser)
-    if laser.collision(obj) and not obj.immune:
-        obj.health -= boss.power
+    if laser.collision(obj):
+        if not obj.immune:
+            obj.health -= laser.vel/2
+        else:
+            obj.health -= laser.vel/4
+        
+
 
 
 def shield_mechanic(boss):
@@ -153,4 +162,8 @@ def reflector_mechanic(boss):
 def drone_mechanic(boss):
     boss.asset_health = boss.max_health / 100
     boss.asset_spawn_rate = (60 * set_FPS) / boss.power
+    boss.drone_img = drone_img
+    boss.drone_laser = drone_laser_img
+    boss.health += boss.asset_health
+    
 

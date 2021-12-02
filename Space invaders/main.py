@@ -149,7 +149,7 @@ def main_loop():
         # ________movement block, outside of event loop so that movement is less clunky
         keys = pygame.key.get_pressed()  # creates a variable to track key presses, checks based on FPS value. This block is where controls live.
         if keys[pygame.K_a]:
-            if player.x >= quadrant:  # left movement
+            if player.x > quadrant:  # left movement
                 player.x -= player_vel
             else:
                 for b in bgs:
@@ -193,7 +193,7 @@ def main_loop():
             player.y += player_vel
         if keys[pygame.K_SPACE]:
             player.shoot()
-            if player.butterfly_gun:#put in it's own function
+            if player.butterfly_gun:
                 player.butterfly_timer -= 1
                 butterfly_shoot(player)
 
@@ -219,6 +219,7 @@ def main_loop():
             level += 1
             wave_length += 1
             if level < 16 and level % 5 == 0:
+                scroll_vel += 1
                 player.lives += 1
                 enemy_vel += 1
                 enemy_laser_vel += 2
@@ -227,27 +228,41 @@ def main_loop():
                 boss = Boss(
                 500, (-1500-(100*level)),
                 random.choice(list(BOSS_COLOR_MAP)),
-                random.choice(list(BOSS_ASSET_MAP["assets"])),
+                random.choice(BOSS_ASSET_MAP["assets"]),
                 random.choice(list(BOSS_WEAPON_MAP)),
-                enemy_vel, enemy_power*100, enemy_power
+                enemy_vel, enemy_laser_vel, enemy_power*1000, enemy_power
                 )
                 enemies.append(boss)
+            if level >= 1:
+                boss.add_assets()
+            if level >= 2:
+                boss.add_assets()
             transition_count = 0
 
             for i in range(wave_length):
                 enemy = Enemy(
                 random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*level), 20),
-                random.choice(list(COLOR_MAP)), enemy_vel, enemy_power*10, enemy_power
+                random.choice(list(COLOR_MAP)), enemy_vel, enemy_laser_vel, enemy_power*10, enemy_power
                 )
                 enemies.append(enemy)
 
 
 #makes enemies move, shoot, randomizes shooting
-        for enemy in enemies:
+        if enemies:
+            if boss in enemies and boss.destroyed:
+                for enemy in enemies:
+                    if type(enemy).__name__ == "Ship" and not enemy.drops:
+                        enemy.drop_()
+        for enemy in enemies:                    
             if not enemy.destroyed:
                 enemy.move(enemy.vel, enparmove, set_FPS)#move method
-            enemy.move_lasers(player)#move lasers after being shot method
-
+            if type(enemy).__name__ != "Ship":
+                enemy.move_lasers(player)#move lasers after being shot method
+            else:
+                if boss and not boss.assets:
+                    enemy.move_lasers(boss)
+                else:
+                    enemy.move_lasers(player)
             #move prompts
             if enemy.y < 0:#will move down
                 enemy.direction = True
@@ -265,7 +280,7 @@ def main_loop():
             if enemy.destroyed:#initiates drop movement and removes enemy when drops expire/taken
                 for drop in enemy.drops:
                     enemy.move_drops(drop.vel, player)
-                if not enemy.drops and not enemy.lasers:
+                if not enemy.drops and not enemy.lasers and not enemy.assets:
                     if type(enemy).__name__ != "Boss":
                         enemies.remove(enemy)
                     elif enemy.explosion_time > set_FPS:
@@ -291,11 +306,12 @@ def main_loop():
                             enemy.drop_()
                 enemy.move_assets()
                 if enemy.assets:
-                    if enemy.asset_type == "drone":
+                    if "drone" in enemy.asset_type:
                         enemy.asset_spawn_rate -= 1
                         if enemy.asset_spawn_rate <= 0:
-                            drone = Ship(enemy.x, enemy.y, enemy.power/4)
+                            drone = Ship(enemy.x, enemy.y, enemy_vel, enemy_laser_vel*2, enemy.power/4)
                             drone.ship_img = enemy.drone_img
+                            drone.laser_img = enemy.drone_laser
                             drone.mask = pygame.mask.from_surface(drone.ship_img)
                             enemies.append(drone)
                             enemy.asset_mechanic(enemy)
@@ -315,6 +331,9 @@ def main_loop():
                                     asset.drop_()
                 elif enemy.immune:
                     enemy.shield_down()
+            
+
+                
 
 
 #check player buff conditions and update stuff

@@ -62,9 +62,10 @@ blank = load_image("assets", "blank.png")
 
 #boss stuff
 drone_img = load_image("assets", "boss_minion.png")
+drone_laser_img = load_image("assets", "pixel_laser_gold.png")
 boss_0 = load_image("assets", "boss_0.png")
 boss_0_0 = load_image("assets", "boss_0_0.png")
-boss_0 = [boss_0_0, boss_0]
+boss_green = [boss_0, boss_0_0]
 boss_0_shield_0 = load_image("assets", "boss_0_shield_0.png")
 boss_0_shield_1 = load_image("assets", "boss_0_shield_1.png")
 boss_0_shield_2 = load_image("assets", "boss_0_shield_2.png")
