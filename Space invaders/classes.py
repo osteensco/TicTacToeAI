@@ -573,6 +573,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                 if 'reflector' in self.asset_type:
                     asset.reflect = True
                 self.assets.append(asset)
+            self.asset_mechanic()
         else:
             for i in range(len(self.asset_img)):
                 asset = Ship(self.x, self.y, 0, 0, self.asset_health)

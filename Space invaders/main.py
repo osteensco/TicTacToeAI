@@ -314,7 +314,7 @@ def main_loop():
                             drone.laser_img = enemy.drone_laser
                             drone.mask = pygame.mask.from_surface(drone.ship_img)
                             enemies.append(drone)
-                            enemy.asset_mechanic(enemy)
+                            enemy.asset_mechanic()
                     for asset in enemy.assets:
                         if asset.destroyed:
                             for drop in asset.drops:
