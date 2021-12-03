@@ -81,14 +81,14 @@ class Explosion(Particle):
     
     def glow_effect(self, window):
         if self.burn_time >= -1:
-            surf = pygame.Surface((self.radius * 2, self.radius * 2),)
-            pygame.draw.circle(surf, (20, 20, 60), (int(self.x), int(self.y)), int(self.burn_time*2))
+            surf = pygame.Surface((int(self.burn_time*4), int(self.burn_time*4)))
+            pygame.draw.circle(surf, (20, 20, 20), (int(self.burn_time*2), int(self.burn_time*2)), int(self.burn_time*2))
             surf.set_colorkey((0, 0, 0))
-            window.blit(surf, (int(self.x), int(self.y)), special_flags=BLEND_RGB_ADD)
+            window.blit(surf, (int(self.x)-int(self.burn_time*2), int(self.y)-int(self.burn_time*2)), special_flags=BLEND_RGB_ADD)
 
     def draw(self, window):
-        super().draw(window)
         self.glow_effect(window)
+        super().draw(window)
 
 
 
