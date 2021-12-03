@@ -16,6 +16,14 @@ from init_game import (
     boss_0_flect,
     boss_0_drone,
     boss_green,
+    boss_1_shield,
+    boss_1_flect,
+    boss_1_drone,
+    boss_blue,
+    boss_2_shield,
+    boss_2_flect,
+    boss_2_drone,
+    boss_red,
     
 )
 from helper_functions import (
@@ -66,8 +74,20 @@ BOSS_ASSET_MAP = {
         "reflector": ([reflector_mechanic], boss_0_flect),
         "drone": ([drone_mechanic], boss_0_drone)
     },
+    "blue": {
+        "shield": ([shield_mechanic], boss_1_shield),
+        "reflector": ([reflector_mechanic], boss_1_flect),
+        "drone": ([drone_mechanic], boss_1_drone)
+    },
+    "red": {
+        "shield": ([shield_mechanic], boss_2_shield),
+        "reflector": ([reflector_mechanic], boss_2_flect),
+        "drone": ([drone_mechanic], boss_2_drone)
+    },
 }
 
 BOSS_COLOR_MAP = {
     "green": boss_green,
+    "blue": boss_blue,
+    "red": boss_red,
 }

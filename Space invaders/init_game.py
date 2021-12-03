@@ -63,6 +63,10 @@ blank = load_image("assets", "blank.png")
 #boss stuff
 drone_img = load_image("assets", "boss_minion.png")
 drone_laser_img = load_image("assets", "pixel_laser_gold.png")
+boss_weapon_0 = load_image("assets", "boss_weapon_0.png")
+boss_weapon_1 = load_image("assets", "boss_weapon_1.png")
+boss_weapon_2 = load_image("assets", "boss_weapon_2.png")
+#green
 boss_0 = load_image("assets", "boss_0.png")
 boss_0_0 = load_image("assets", "boss_0_0.png")
 boss_green = [boss_0, boss_0_0]
@@ -80,9 +84,44 @@ boss_0_flect = [boss_0_flect_0, boss_0_flect_1, boss_0_flect_2, boss_0_flect_3]
 boss_0_drone_0 = load_image("assets", "boss_0_drone_0.png")
 boss_0_drone_1 = load_image("assets", "boss_0_drone_1.png")
 boss_0_drone = [boss_0_drone_0, boss_0_drone_1]
-boss_weapon_0 = load_image("assets", "boss_weapon_0.png")
-boss_weapon_1 = load_image("assets", "boss_weapon_1.png")
-boss_weapon_2 = load_image("assets", "boss_weapon_2.png")
+#blue
+boss_1 = load_image("assets", "boss_1.png")
+boss_1_0 = load_image("assets", "boss_1_0.png")
+boss_blue = [boss_1, boss_1_0]
+boss_1_shield_0 = load_image("assets", "boss_1_shield_0.png")
+boss_1_shield_1 = load_image("assets", "boss_1_shield_1.png")
+boss_1_shield_2 = load_image("assets", "boss_1_shield_2.png")
+boss_1_shield_3 = load_image("assets", "boss_1_shield_3.png")
+boss_1_shield_4 = load_image("assets", "boss_1_shield_4.png")
+boss_1_shield = [boss_1_shield_0, boss_1_shield_1, boss_1_shield_2, boss_1_shield_3, boss_1_shield_4]
+boss_1_flect_0 = load_image("assets", "boss_1_flect_0.png")
+boss_1_flect_1 = load_image("assets", "boss_1_flect_1.png")
+boss_1_flect_2 = load_image("assets", "boss_1_flect_2.png")
+boss_1_flect_3 = load_image("assets", "boss_1_flect_3.png")
+boss_1_flect = [boss_1_flect_0, boss_1_flect_1, boss_1_flect_2, boss_1_flect_3]
+boss_1_drone_0 = load_image("assets", "boss_1_drone_0.png")
+boss_1_drone_1 = load_image("assets", "boss_1_drone_1.png")
+boss_1_drone = [boss_1_drone_0, boss_1_drone_1]
+#red
+boss_2 = load_image("assets", "boss_2.png")
+boss_2_0 = load_image("assets", "boss_2_0.png")
+boss_red = [boss_2, boss_2_0]
+boss_2_shield_0 = load_image("assets", "boss_2_shield_0.png")
+boss_2_shield_1 = load_image("assets", "boss_2_shield_1.png")
+boss_2_shield_2 = load_image("assets", "boss_2_shield_2.png")
+boss_2_shield_3 = load_image("assets", "boss_2_shield_3.png")
+boss_2_shield_4 = load_image("assets", "boss_2_shield_4.png")
+boss_2_shield = [boss_2_shield_0, boss_2_shield_1, boss_2_shield_2, boss_2_shield_3, boss_2_shield_4]
+boss_2_flect_0 = load_image("assets", "boss_2_flect_0.png")
+boss_2_flect_1 = load_image("assets", "boss_2_flect_1.png")
+boss_2_flect_2 = load_image("assets", "boss_2_flect_2.png")
+boss_2_flect_3 = load_image("assets", "boss_2_flect_3.png")
+boss_2_flect = [boss_2_flect_0, boss_2_flect_1, boss_2_flect_2, boss_2_flect_3]
+boss_2_drone_0 = load_image("assets", "boss_2_drone_0.png")
+boss_2_drone_1 = load_image("assets", "boss_2_drone_1.png")
+boss_2_drone = [boss_2_drone_0, boss_2_drone_1]
+
+
 
 #player ship
 player_space_ship = load_image("assets", "pixel_ship_yellow.png")
