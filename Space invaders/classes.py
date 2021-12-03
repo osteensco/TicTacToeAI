@@ -249,6 +249,7 @@ class Ship:
         self.cool_down_counter = 0
         self.drops = []
         self.assets = []
+        self.asset_type = None
         self.immune = False
         self.shield_timer = 0
         self.butterfly_gun = False
@@ -505,15 +506,17 @@ class Enemy(Ship):
 
 class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                  # randomize these matches. Keep in dict for key/values like color map?
-    def __init__(self, x, y, color, asset, weapon, vel, laser_vel, health=10000, enemy_power=10):
+    def __init__(self, x, y, color, assets, weapon, vel, laser_vel, health=10000, enemy_power=10):
         super().__init__(x, y, vel, laser_vel, health)
         self.x = x
         self.y = y
         self.power = enemy_power * 2
         self.color = color
         self.ship_img, self.shieldup_img = BOSS_COLOR_MAP[color]
-        self.asset_type = [asset]
-        self.asset_mech, self.asset_img = BOSS_ASSET_MAP[color][asset]
+        self.number_of_assets = assets
+        self.asset_type = []
+        self.asset_mechs = []
+        self.asset_img = []
         self.weapon = weapon
         self.weapon_mechanic, self.laser_img = BOSS_WEAPON_MAP[weapon]
         self.max_health = health
@@ -531,7 +534,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.height = self.ship_img.get_height()
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.add_assets()
-        self.asset_mechanic()
         
 
     def healthbar(self, window):
@@ -559,33 +561,27 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
 
     def add_assets(self):
-        if self.assets:
-            choices = [i for i in BOSS_ASSET_MAP["assets"] if i not in self.assets]
+        for x in range(self.number_of_assets):
+            choices = [i for i in BOSS_ASSET_MAP["assets"] if i not in self.asset_type]
             a = random.choice(choices)
             self.asset_type.append(a)
-            self.asset_mech.extend(BOSS_ASSET_MAP[self.color][a][0])
+            self.asset_mechs.extend(BOSS_ASSET_MAP[self.color][a][0])
             self.asset_img.extend(BOSS_ASSET_MAP[self.color][a][1])
             s = len(self.assets)
+            self.asset_mechanic()
             for i in range(s, len(self.asset_img)):
                 asset = Ship(self.x, self.y, 0, 0, self.asset_health)
+                asset.asset_type = a
                 asset.ship_img = self.asset_img[i]
                 asset.mask = pygame.mask.from_surface(self.asset_img[i])
-                if 'reflector' in self.asset_type:
+                if asset.asset_type == 'reflector':
                     asset.reflect = True
                 self.assets.append(asset)
-            self.asset_mechanic()
-        else:
-            for i in range(len(self.asset_img)):
-                asset = Ship(self.x, self.y, 0, 0, self.asset_health)
-                asset.ship_img = self.asset_img[i]
-                asset.mask = pygame.mask.from_surface(self.asset_img[i])
-                if 'reflector' in self.asset_type:
-                    asset.reflect = True
-                self.assets.append(asset)
+        
 
     
     def asset_mechanic(self):
-        for f in self.asset_mech:
+        for f in self.asset_mechs:
             f(self)
 
         

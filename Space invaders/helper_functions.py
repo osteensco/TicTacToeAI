@@ -120,6 +120,8 @@ def butterfly_shoot(obj):
                     laser.butterfly_dir += 1
                     laser.butterfly_vel += 1
 
+
+#boss weapon mechanics
 def mine_mechanic(boss, laser, obj):
     if laser.moving and HEIGHT - 50 >= laser.y >= random.randint(obj.y-75, obj.y+100):
         laser.moving = False
@@ -148,15 +150,15 @@ def shotgun_mechanic(boss, laser, obj):
             obj.health -= laser.vel/4
         
 
-
-
+#boss asset mechanics
 def shield_mechanic(boss):
+    boss.asset_health = boss.max_health / 50
     boss.immune = True
     pygame.mask.from_surface(boss.shieldup_img)
 
 
 def reflector_mechanic(boss):
-    boss.asset_health = boss.max_health * 1.5
+    boss.asset_health = boss.max_health/20
 
 
 def drone_mechanic(boss):

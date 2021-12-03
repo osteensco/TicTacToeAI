@@ -228,15 +228,12 @@ def main_loop():
                 boss = Boss(
                 500, (-1500-(100*level)),
                 random.choice(list(BOSS_COLOR_MAP)),
-                random.choice(BOSS_ASSET_MAP["assets"]),
+                2,
                 random.choice(list(BOSS_WEAPON_MAP)),
                 enemy_vel, enemy_laser_vel, enemy_power*1000, enemy_power
                 )
                 enemies.append(boss)
-            if level >= 1:
-                boss.add_assets()
-            if level >= 2:
-                boss.add_assets()
+
             transition_count = 0
 
             for i in range(wave_length):
@@ -259,7 +256,7 @@ def main_loop():
             if type(enemy).__name__ != "Ship":
                 enemy.move_lasers(player)#move lasers after being shot method
             else:
-                if boss and not boss.assets:
+                if boss and len([s for s in boss.assets if s.asset_type == "drone"]) == 0:
                     enemy.move_lasers(boss)
                 else:
                     enemy.move_lasers(player)
@@ -309,12 +306,12 @@ def main_loop():
                     if "drone" in enemy.asset_type:
                         enemy.asset_spawn_rate -= 1
                         if enemy.asset_spawn_rate <= 0:
+                            enemy.asset_mechanic()
                             drone = Ship(enemy.x, enemy.y, enemy_vel, enemy_laser_vel*2, enemy.power/4)
                             drone.ship_img = enemy.drone_img
                             drone.laser_img = enemy.drone_laser
                             drone.mask = pygame.mask.from_surface(drone.ship_img)
                             enemies.append(drone)
-                            enemy.asset_mechanic()
                     for asset in enemy.assets:
                         if asset.destroyed:
                             for drop in asset.drops:
@@ -329,8 +326,8 @@ def main_loop():
                                 asset.health -= 10
                                 if asset.health <= 0:
                                     asset.drop_()
-                elif enemy.immune:
-                    enemy.shield_down()
+                    if enemy.immune and len([s for s in enemy.assets if s.asset_type == "shield"]) == 0:
+                        enemy.shield_down()
             
 
                 
