@@ -1,5 +1,6 @@
 import pygame
 import random
+from pygame.constants import BLEND_RGB_ADD
 from init_game import (
     blank,
     explosions,
@@ -49,11 +50,19 @@ class ShieldHit(Particle):
         self.x_vel = random.randint(-2, 2)
         self.y_vel = random.randint(-2, 2)
         self.burn_time = random.randint(10, 16)
+        self.slinky = self.burn_time/2
+        self.orgin_x = x
+        self.origin_y = y
 
     def spark_effect(self):
-        self.x += self.x_vel
-        self.y += self.y_vel
-        self.burn_time -= .5
+        if self.burn_time > self.slinky:
+            self.x += self.x_vel
+            self.y += self.y_vel
+            self.burn_time -= .5
+        else:
+            self.x -= self.x_vel
+            self.y -= self.y_vel
+            self.burn_time -= .4
 
 
 
@@ -70,6 +79,17 @@ class Explosion(Particle):
         self.y += self.y_vel
         self.burn_time -= .05
     
+    def glow_effect(self, window):
+        if self.burn_time >= -1:
+            surf = pygame.Surface((self.radius * 2, self.radius * 2),)
+            pygame.draw.circle(surf, (20, 20, 60), (int(self.x), int(self.y)), int(self.burn_time*2))
+            surf.set_colorkey((0, 0, 0))
+            window.blit(surf, (int(self.x), int(self.y)), special_flags=BLEND_RGB_ADD)
+
+    def draw(self, window):
+        super().draw(window)
+        self.glow_effect(window)
+
 
 
 class Drop:

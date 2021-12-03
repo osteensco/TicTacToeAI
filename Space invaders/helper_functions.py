@@ -71,7 +71,7 @@ def health_buff(obj):
         obj.health = obj.max_health
     elif obj.lives < 10:
         obj.lives += 1
-        obj.health = 20
+        obj.health = 50
 
 def fire_rate_buff(obj):
     obj.score += 1
@@ -132,7 +132,7 @@ def mine_mechanic(boss, laser, obj):
         boss.lasers.remove(laser)
 
 def laser_mechanic(boss, laser, obj):
-    laser.vel += 1
+    laser.vel += .25
     if laser.off_screen(HEIGHT, WIDTH):
         boss.lasers.remove(laser)
     if laser.collision(obj) and not obj.immune:

@@ -224,15 +224,34 @@ def main_loop():
                 enemy_vel += 1
                 enemy_laser_vel += 2
                 enemy_power += 10
-            if level % 1 == 0:
+            if level % 1 == 0 and level <= 10:
+                boss = Boss(
+                500, (-1500-(100*level)),
+                random.choice(list(BOSS_COLOR_MAP)),
+                1,
+                random.choice(list(BOSS_WEAPON_MAP)),
+                enemy_vel, enemy_laser_vel, enemy_power*100, enemy_power
+                )
+                enemies.append(boss)
+            elif level % 3 == 0 and 10 <= level <= 18:
                 boss = Boss(
                 500, (-1500-(100*level)),
                 random.choice(list(BOSS_COLOR_MAP)),
                 2,
                 random.choice(list(BOSS_WEAPON_MAP)),
+                enemy_vel, enemy_laser_vel, enemy_power*100, enemy_power
+                )
+                enemies.append(boss)
+            elif level % 2 == 0 and level >= 20:
+                boss = Boss(
+                500, (-1500-(100*level)),
+                random.choice(list(BOSS_COLOR_MAP)),
+                3,
+                random.choice(list(BOSS_WEAPON_MAP)),
                 enemy_vel, enemy_laser_vel, enemy_power*1000, enemy_power
                 )
                 enemies.append(boss)
+            else: boss = None
 
             transition_count = 0
 
@@ -244,9 +263,9 @@ def main_loop():
                 enemies.append(enemy)
 
 
-#makes enemies move, shoot, randomizes shooting
-        if enemies:
-            if boss in enemies and boss.destroyed:
+#various enemy behaviours and movement logic
+        if enemies and boss:
+            if boss.destroyed:
                 for enemy in enemies:
                     if type(enemy).__name__ == "Ship" and not enemy.drops:
                         enemy.drop_()
