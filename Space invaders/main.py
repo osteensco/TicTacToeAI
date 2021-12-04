@@ -157,19 +157,26 @@ def main_loop():
                 for laser in player.lasers:
                         laser.x += player_vel
                         for particle in laser.particles:
-                            particle.x += player_vel
+                            if type(particle).__name__ != "ShieldHit":
+                                particle.x += player_vel
                 for enemy in enemies:
                     if enemy.x < WIDTH - enemy.get_width():
                         enemy.x += player_vel
+                        if enemy.rect:
+                            enemy.rect.x += player_vel
                     for particle in enemy.particles:
                         particle.x += player_vel
                     for drop in enemy.drops:
                         drop.x += player_vel
                     for laser in enemy.lasers:
                         laser.x += player_vel
+                        if laser.rect:
+                            laser.rect.x += player_vel
                         for particle in laser.particles:
                             particle.x += player_vel
                     for asset in enemy.assets:
+                        if asset.rect:
+                            asset.rect.x += player_vel
                         for particle in asset.particles:
                             particle.x += player_vel
                         for drp in asset.drops:
@@ -183,19 +190,26 @@ def main_loop():
                 for laser in player.lasers:
                         laser.x -= player_vel
                         for particle in laser.particles:
-                            particle.x -= player_vel
+                            if type(particle).__name__ != "ShieldHit":
+                                particle.x -= player_vel
                 for enemy in enemies:
                     if enemy.x > 0:
                         enemy.x -= player_vel
+                        if enemy.rect:
+                            enemy.rect.x -= player_vel
                     for particle in enemy.particles:
                         particle.x -= player_vel
                     for drop in enemy.drops:
                         drop.x -= player_vel
                     for laser in enemy.lasers:
                         laser.x -= player_vel
+                        if laser.rect:
+                            laser.rect.x -= player_vel
                         for particle in laser.particles:
                             particle.x -= player_vel
                     for asset in enemy.assets:
+                        if asset.rect:
+                            asset.rect.x -= player_vel
                         for particle in asset.particles:
                             particle.x -= player_vel
                         for drp in asset.drops:
@@ -286,8 +300,7 @@ def main_loop():
                     if type(enemy).__name__ == "Ship" and not enemy.drops:
                         enemy.drop_()
         for enemy in enemies:                    
-            if not enemy.destroyed:
-                enemy.move(enemy.vel, enparmove, set_FPS)#move method
+            enemy.move(enemy.vel, enparmove, set_FPS)#move method
             if type(enemy).__name__ != "Ship":
                 enemy.move_lasers(player)#move lasers after being shot method
             else:

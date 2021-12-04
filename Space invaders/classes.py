@@ -46,7 +46,7 @@ class Particle:#circles for now, can break out into child classes for other imag
 class ShieldHit(Particle):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.color = (0, 0, random.randint(60, 176), 235) 
+        self.color = (0, 0, random.randint(60, 176), 175) 
         self.x_vel = random.randint(-2, 2)
         self.y_vel = random.randint(-2, 2)
         self.burn_time = random.randint(10, 16)
@@ -69,7 +69,7 @@ class ShieldHit(Particle):
             surf = pygame.Surface((int(self.burn_time*2), int(self.burn_time*2)), pygame.SRCALPHA)
             pygame.draw.circle(surf, self.color, (int(self.burn_time), int(self.burn_time)), int(self.burn_time))
             surf.set_colorkey((0, 0, 0))
-            window.blit(surf, (int(self.x)-int(self.burn_time), int(self.y)-int(self.burn_time)), special_flags=BLEND_RGBA_ADD)
+            window.blit(surf, (int(self.x)-int(self.burn_time), int(self.y)-int(self.burn_time)))
 
 
 
@@ -108,12 +108,12 @@ class Explosion(Particle):
         self.color = (255, random.randint(60, 176), 0) 
         self.x_vel = random.randint(-4, 4)
         self.y_vel = random.randint(-4, 4)
-        self.burn_time = random.randint(8, 14)
+        self.burn_time = random.randint(14, 20)
 
     def spark_effect(self):
         self.x += self.x_vel
         self.y += self.y_vel
-        self.burn_time -= .2
+        self.burn_time -= .5
     
     def glow_effect(self, window):
         surf = pygame.Surface((int(self.burn_time*2), int(self.burn_time*2)))
@@ -171,6 +171,7 @@ class Laser:
         self.reflected = False
         self.killshot = False
         self.hit = None
+        self.rect = None
         self.colpoint = ()
         self.butterfly_dir, self.butterfly_vel = self.butterfly_stats()
     
@@ -222,11 +223,11 @@ class Laser:
             self.hit = obj
             if not obj.immune:
                 if not obj.reflect:
-                    for i in range(0, random.randint(10, 30)):
+                    for i in range(0, random.randint(5, 15)):
                         particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
                         self.particles.append(particle)
                 else:
-                    for i in range(0, random.randint(10, 30)):
+                    for i in range(0, random.randint(5, 15)):
                         particle = Spark(self.x + (self.img.get_width() / 4), self.y)
                         self.particles.append(particle)
             else:
@@ -254,7 +255,6 @@ class BossLaser(Laser):
         self.boom = explosions
         self.exploding = False
         self.explosion_time = 0
-        self.rect = None
         self.angle = 0
 
     def img_rotate(self, img, angle):
@@ -353,32 +353,33 @@ class Ship:
 
 
     def move(self, vel, parallel, set_FPS):#for random side-side movement included add in parallel
-        if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
-            self.y += vel
-        if not self.direction:
-            self.y -= vel*2
-        if self.right:
-            if self.x + self.get_width() < WIDTH:
-                self.x += parallel
-            self.move_time -= 1
-        if self.left:
-            if self.x > -1:
-                self.x -= parallel
-            self.move_time -= 1
-        if self.move_time == 0:
-            left_right = random.randint(1, 10)
-            if left_right > 8:
-                self.right = True
-                self.left = False
-                self.move_time = set_FPS * (random.randint(1, 5))
-            elif left_right < 3:
-                self.left = True
-                self.right = False
-                self.move_time = set_FPS * (random.randint(1, 5))
-            else:
-                if self.right or self.left:
-                    self.right = False
+        if not self.destroyed:
+            if self.direction:#set parameters for changing vertical direction, has to be in class for individual movement
+                self.y += vel
+            if not self.direction:
+                self.y -= vel*2
+            if self.right:
+                if self.x + self.get_width() < WIDTH:
+                    self.x += parallel
+                self.move_time -= 1
+            if self.left:
+                if self.x > -1:
+                    self.x -= parallel
+                self.move_time -= 1
+            if self.move_time == 0:
+                left_right = random.randint(1, 10)
+                if left_right > 8:
+                    self.right = True
                     self.left = False
+                    self.move_time = set_FPS * (random.randint(1, 5))
+                elif left_right < 3:
+                    self.left = True
+                    self.right = False
+                    self.move_time = set_FPS * (random.randint(1, 5))
+                else:
+                    if self.right or self.left:
+                        self.right = False
+                        self.left = False
 
 
     def explode(self, window, set_FPS):
@@ -389,6 +390,7 @@ class Ship:
         window.blit(expl, (self.x, self.y))
         particle = Explosion(self.x + (self.ship_img.get_width() / 4), self.y + (self.ship_img.get_height() / 4))
         self.particles.append(particle)
+        self.rect = expl.get_rect(topleft=(self.x, self.y))
         if self.explosion_time > set_FPS / 3:
             window.blit(self.ship_img, (self.x, self.y))
         
@@ -561,8 +563,8 @@ class Player(Ship):
 
 
     def draw(self, window, set_FPS):
-        super().draw(window, set_FPS)
         self.healthbar(window)
+        super().draw(window, set_FPS)
 
 
 #______________________________________________________________________________________________________________________
@@ -613,7 +615,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.health = self.max_health
         self.asset_health = self.max_health / 100
         self.asset_spawn_rate = 0
-        self.minions = []
+        self.rects = []
         self.drone_img = None
         self.drone_laser = None
         self.direction = True
@@ -708,6 +710,34 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             if not laser.moving and not laser.particles and not laser.exploding and not laser.armed:
                 self.lasers.remove(laser)
             self.weapon_mechanic(self, laser, obj)
+
+
+    def drop_(self, range_low=1, range_high=10, threshold=8):
+        if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
+            drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
+            self.drops.append(drop)
+        if self.rect == None:
+            self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
+            for r in range(random.randint(3, 5)):
+                rect = self.rect
+                self.rects.append(rect)
+        self.ship_img = self.clear_img
+        self.mask = None
+        self.destroyed = True
+
+
+    def explode(self, window, set_FPS):
+        self.explosion_time += 1
+        for rect in self.rects:
+            expl = random.choice(self.boom)
+            rect.x = rect.centerx + random.uniform(-expl.get_width(), 0)
+            rect.y = rect.centery + random.uniform(-expl.get_height(), 0)
+            window.blit(expl, (rect.x, rect.y))
+            particle = Explosion(rect.x + (expl.get_width() / 4), rect.y + (expl.get_height() / 4))
+            self.particles.append(particle)
+            rect = expl.get_rect(topleft=(rect.x, rect.y))
+        if self.explosion_time > set_FPS / 3:
+            window.blit(self.ship_img, (self.x, self.y))
         
 
 
