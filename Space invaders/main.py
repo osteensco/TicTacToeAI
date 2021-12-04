@@ -156,14 +156,22 @@ def main_loop():
                     b.x += scroll_vel*2
                 for laser in player.lasers:
                         laser.x += player_vel
+                        for particle in laser.particles:
+                            particle.x += player_vel
                 for enemy in enemies:
                     if enemy.x < WIDTH - enemy.get_width():
                         enemy.x += player_vel
+                    for particle in enemy.particles:
+                        particle.x += player_vel
                     for drop in enemy.drops:
                         drop.x += player_vel
                     for laser in enemy.lasers:
                         laser.x += player_vel
+                        for particle in laser.particles:
+                            particle.x += player_vel
                     for asset in enemy.assets:
+                        for particle in asset.particles:
+                            particle.x += player_vel
                         for drp in asset.drops:
                             drp.x += player_vel
         if keys[pygame.K_d]:
@@ -174,14 +182,22 @@ def main_loop():
                     b.x -= scroll_vel*2
                 for laser in player.lasers:
                         laser.x -= player_vel
+                        for particle in laser.particles:
+                            particle.x -= player_vel
                 for enemy in enemies:
                     if enemy.x > 0:
                         enemy.x -= player_vel
+                    for particle in enemy.particles:
+                        particle.x -= player_vel
                     for drop in enemy.drops:
                         drop.x -= player_vel
                     for laser in enemy.lasers:
                         laser.x -= player_vel
+                        for particle in laser.particles:
+                            particle.x -= player_vel
                     for asset in enemy.assets:
+                        for particle in asset.particles:
+                            particle.x -= player_vel
                         for drp in asset.drops:
                             drp.x -= player_vel
         if keys[pygame.K_w] and player.y > -1:  # up movement
