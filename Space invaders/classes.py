@@ -113,7 +113,7 @@ class Explosion(Particle):
     def spark_effect(self):
         self.x += self.x_vel
         self.y += self.y_vel
-        self.burn_time -= .15
+        self.burn_time -= .2
     
     def glow_effect(self, window):
         surf = pygame.Surface((int(self.burn_time*2), int(self.burn_time*2)))
@@ -170,6 +170,8 @@ class Laser:
         self.moving = True
         self.reflected = False
         self.killshot = False
+        self.hit = None
+        self.colpoint = ()
         self.butterfly_dir, self.butterfly_vel = self.butterfly_stats()
     
 
@@ -184,10 +186,14 @@ class Laser:
             window.blit(self.img, (self.x, self.y))
         if self.particles:
             for part in self.particles:
+                if self.hit and self.hit.immune:
+                    part.x -= self.colpoint[0] - self.hit.x
+                    part.y -= self.colpoint[1] - self.hit.y
                 part.spark_effect()
                 part.draw(window)
                 if part.burn_time <= 0:
                     self.particles.remove(part)
+            self.colpoint = (self.hit.x, self.hit.y)
 
     def move(self):
         if self.moving:
@@ -213,6 +219,7 @@ class Laser:
 
     def collision(self, obj):
         if collide(self, obj):
+            self.hit = obj
             if not obj.immune:
                 if not obj.reflect:
                     for i in range(0, random.randint(10, 30)):
@@ -223,6 +230,7 @@ class Laser:
                         particle = Spark(self.x + (self.img.get_width() / 4), self.y)
                         self.particles.append(particle)
             else:
+                self.colpoint = (obj.x, obj.y)
                 for i in range(0, random.randint(30, 50)):
                     particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
                     self.particles.append(particle)
@@ -270,6 +278,7 @@ class BossLaser(Laser):
 
     def collision(self, obj):
         if collide(self, obj):
+            self.hit = obj
             if self.armed:
                 self.exploding = True
                 self.armed = False
