@@ -440,6 +440,54 @@ def main_loop():
 #                 if event.key == pygame.K_RETURN:
 #                     main_menu()
 
+class Menu():
+    def __init__(self) -> None:
+        running = True
+        start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
+        self.bgs = bgs
+
+    def run(self):
+        while self.running:
+            dyn_background(bgs, scroll_vel/5, x_adj, y_adj)
+            for bg in bgs:
+                bg.draw(WIN)
+            start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
+            # settings_label = title_font.render("Press 's' for settings", 1, (255,255,255))
+            WIN.blit(start_label, (WIDTH/2 - start_label.get_width()/2, HEIGHT/2 - start_label.get_height()/2))
+            # WIN.blit(settings_label, (WIDTH / 2 - settings_label.get_width() / 2, (HEIGHT / 2 - settings_label.get_height() / 2) + start_label.get_height()))
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    main_menu_run = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        main_loop()
+                    # if event.key == pygame.K_s:
+                    #     settings_menu()
+        quit()
+
+    def background(self):
+        dyn_background(bgs, scroll_vel/5, x_adj, y_adj)
+        for bg in self.bgs:
+            bg.draw(WIN)
+
+    def draw(self):
+        self.background()
+        WIN.blit(self.start_label, (WIDTH/2 - self.start_label.get_width()/2, HEIGHT/2 - self.start_label.get_height()/2))
+        pygame.display.update()
+
+    def track_events(self):
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    main_menu_run = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        main_loop()
+
+
+
+
 
 def main_menu():#convert to a class at some point
     main_menu_run = True
