@@ -174,6 +174,7 @@ class Laser:
         self.rect = None
         self.colpoint = ()
         self.butterfly_dir, self.butterfly_vel = self.butterfly_stats()
+        self.angle = 0
     
 
     def butterfly_stats(self):
@@ -182,9 +183,16 @@ class Laser:
         else:
             return None, None
 
+    def img_rotate(self, img, angle):
+        self.angle += self.vel
+        return pygame.transform.rotozoom(img, angle, 1)
+
     def draw(self, window):
         if self.moving:
-            window.blit(self.img, (self.x, self.y))
+            if not self.butterfly:
+                window.blit(self.img, (self.x, self.y))
+            else:
+                window.blit(self.img_rotate(self.img, self.angle), (self.x, self.y))
         if self.particles:
             for part in self.particles:
                 if self.hit and self.hit.immune:
@@ -207,7 +215,6 @@ class Laser:
                 self.particles.append(spark)
             self.killshot = False
             
-
     def butterfly_move(self):
         self.y += self.butterfly_dir
         self.x -= self.butterfly_vel
@@ -255,7 +262,7 @@ class BossLaser(Laser):
         self.boom = explosions
         self.exploding = False
         self.explosion_time = 0
-        self.angle = 0
+
 
     def img_rotate(self, img, angle):
         self.angle += self.vel
@@ -344,6 +351,7 @@ class Ship:
         self.move_time = 0
         self.destroyed = False
         self.particles = []
+        self.rects = []
         self.explosion_time = 0
         self.width = 0
         self.height = 0
@@ -431,7 +439,7 @@ class Ship:
 
 
     def drop_(self, range_low=1, range_high=10, threshold=8):
-        if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
+        if random.randint(range_low, range_high) > threshold:
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
         if self.rect == None:
@@ -615,7 +623,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.health = self.max_health
         self.asset_health = self.max_health / 100
         self.asset_spawn_rate = 0
-        self.rects = []
         self.drone_img = None
         self.drone_laser = None
         self.direction = True
@@ -690,9 +697,10 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
     def move_assets(self):
         for asset in self.assets:
-            asset.x = self.x
-            asset.y = self.y
-            if self.health <= 0 and not asset.drops:
+            if self.health > 0:
+                asset.x = self.x
+                asset.y = self.y
+            elif self.health <= 0 and not asset.drops:
                 self.assets.remove(asset)
 
 
@@ -713,7 +721,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
 
     def drop_(self, range_low=1, range_high=10, threshold=8):
-        if random.randint(range_low, range_high) > threshold:#random.randint(0,10)
+        if random.randint(range_low, range_high) > threshold:
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
         if self.rect == None:
@@ -730,12 +738,13 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.explosion_time += 1
         for rect in self.rects:
             expl = random.choice(self.boom)
-            rect.x = rect.centerx + random.uniform(-expl.get_width(), 0)
-            rect.y = rect.centery + random.uniform(-expl.get_height(), 0)
-            window.blit(expl, (rect.x, rect.y))
-            particle = Explosion(rect.x + (expl.get_width() / 4), rect.y + (expl.get_height() / 4))
+            self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
+            self.y = rect.centery + random.uniform(-expl.get_height(), 0)
+            window.blit(expl, (self.x, self.y))
+            particle = Explosion(self.x + (expl.get_width() / 4), self.y + (expl.get_height() / 4))
             self.particles.append(particle)
-            rect = expl.get_rect(topleft=(rect.x, rect.y))
+            rect = expl.get_rect(topleft=(self.x, self.y))
+        super().explode(window, set_FPS)
         if self.explosion_time > set_FPS / 3:
             window.blit(self.ship_img, (self.x, self.y))
         

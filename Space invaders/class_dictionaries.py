@@ -49,7 +49,6 @@ COLOR_MAP = {
     "blue": (blue_space_ship, blue_laser)
 }
 
-#dict connects a drop to a buff function and image, similar to how COLOR_MAP for enemies connects a color to ship and laser images
 DROP_MAP = {
     "health": (health_buff, health_drop),
     "fire rate": (fire_rate_buff, fire_rate_drop),

@@ -162,8 +162,12 @@ def main_loop():
                 for enemy in enemies:
                     if enemy.x < WIDTH - enemy.get_width():
                         enemy.x += player_vel
-                        if enemy.rect:
+                        if enemy.rect and not enemy.rects:
                             enemy.rect.x += player_vel
+                        elif enemy.rects:
+                            enemy.rect.x += player_vel
+                            for rect in enemy.rects:
+                                rect.x += player_vel
                     for particle in enemy.particles:
                         particle.x += player_vel
                     for drop in enemy.drops:
@@ -195,8 +199,12 @@ def main_loop():
                 for enemy in enemies:
                     if enemy.x > 0:
                         enemy.x -= player_vel
-                        if enemy.rect:
+                        if enemy.rect and not enemy.rects:
                             enemy.rect.x -= player_vel
+                        elif enemy.rects:
+                            enemy.rect.x -= player_vel
+                            for rect in enemy.rects:
+                                rect.x -= player_vel
                     for particle in enemy.particles:
                         particle.x -= player_vel
                     for drop in enemy.drops:
@@ -278,7 +286,7 @@ def main_loop():
                 random.choice(list(BOSS_COLOR_MAP)),
                 3,
                 random.choice(list(BOSS_WEAPON_MAP)),
-                enemy_vel, enemy_laser_vel, enemy_power*1000, enemy_power
+                enemy_vel, enemy_laser_vel, enemy_power*300, enemy_power
                 )
                 enemies.append(boss)
             else: boss = None
@@ -298,7 +306,7 @@ def main_loop():
             if boss.destroyed:
                 for enemy in enemies:
                     if type(enemy).__name__ == "Ship" and not enemy.drops:
-                        enemy.drop_()
+                        enemy.drop_(0,0,0)
         for enemy in enemies:                    
             enemy.move(enemy.vel, enparmove, set_FPS)#move method
             if type(enemy).__name__ != "Ship":
@@ -353,7 +361,7 @@ def main_loop():
                 if enemy.assets:
                     if "drone" in enemy.asset_type:
                         enemy.asset_spawn_rate -= 1
-                        if enemy.asset_spawn_rate <= 0:
+                        if enemy.asset_spawn_rate <= 0 and len(enemies) <= 20:
                             enemy.asset_mechanic()
                             drone = Ship(enemy.x, enemy.y, enemy_vel, enemy_laser_vel*2, enemy.power/4)
                             drone.ship_img = enemy.drone_img
