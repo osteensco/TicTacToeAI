@@ -637,11 +637,15 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         
 
     def healthbar(self, window):
-        if self.immune:
-            pygame.draw.rect(window, (0, 0, 255), (380, 10, 350, 40))
-        else:
+        if not self.immune and self.health <= self.max_health:
             pygame.draw.rect(window, (255, 0, 0), (380, 10, 350, 40))
             pygame.draw.rect(window, (0, 255, 0), (380, 10, 350 * (self.health / self.max_health), 40))
+        elif self.immune:
+            pygame.draw.rect(window, (0, 0, 255), (380, 10, 350, 40))
+        elif self.health > self.max_health:
+            pygame.draw.rect(window, (0, 255, 0), (380, 10, 350, 40))
+            pygame.draw.rect(window, (255, 255, 0), (380, 10, 350 * (self.health - self.max_health) / self.max_health, 40))
+        
 
 
     def draw(self, window, set_FPS):
@@ -752,6 +756,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         
 
     def laser_pos(self):
-        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + (self.get_height() * 2/3)))
+        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + (self.get_height() - self.laser_img.get_height())))
 
 

@@ -78,14 +78,17 @@ def main_loop():
     def redraw_window():
         for bg in bgs:
             bg.draw(WIN)
-        if player.lives == 1:
-            lives_label = main_font.render(f"Shield Layers: {player.lives}", 1, (255, 0, 0))  # red for 1 life left
-        else:
+        if player.lives > 1:
             lives_label = main_font.render(f"Shield Layers: {player.lives}", 1, (255, 255, 255))
+            player_health_label = main_font.render(f"Shield Strength: {player.health}", 1, (0, 225, 0))
+        else:
+            lives_label = main_font.render(f"Shield Layers: {player.lives}", 1, (255, 0, 0))  # red for 1 life left
+            player_health_label = main_font.render(f"Shield Strength: {player.health}", 1, (225, 0, 0))
+
 
         level_label = main_font.render(f"Level: {level}", 1, (255, 255, 255))  # level label top right corner
-        player_health_label = main_font.render(f"Shield Strength: {player.health}", 1, (0, 225, 0))
-        score_label = main_font.render(f"Player Score: {player.score}", 1, (235, 0, 255))
+        
+        score_label = main_font.render(f"Score: {player.score}", 1, (235, 0, 255))
 
         enemy_count_label = main_font.render(f"Enemies: {len(enemies)}", 1, (255, 255, 255))
 
@@ -164,7 +167,7 @@ def main_loop():
                         elif enemy.rects:
                             enemy.rect.x += player_vel
                             for rect in enemy.rects:
-                                rect.x += player_vel
+                                rect.x += player_vel/2
                     for particle in enemy.particles:
                         particle.x += player_vel
                     for drop in enemy.drops:
@@ -174,7 +177,8 @@ def main_loop():
                         if laser.rect:
                             laser.rect.x += player_vel
                         for particle in laser.particles:
-                            particle.x += player_vel
+                            if type(particle).__name__ != "ShieldHit":
+                                particle.x += player_vel
                     for asset in enemy.assets:
                         if asset.rect:
                             asset.rect.x += player_vel
@@ -201,9 +205,10 @@ def main_loop():
                         elif enemy.rects:
                             enemy.rect.x -= player_vel
                             for rect in enemy.rects:
-                                rect.x -= player_vel
+                                rect.x -= player_vel/2
                     for particle in enemy.particles:
-                        particle.x -= player_vel
+                        if type(particle).__name__ != "ShieldHit":
+                            particle.x -= player_vel
                     for drop in enemy.drops:
                         drop.x -= player_vel
                     for laser in enemy.lasers:
