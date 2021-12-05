@@ -1,6 +1,6 @@
 import pygame
 import random
-from pygame.constants import BLEND_RGB_ADD, BLEND_RGBA_ADD
+from pygame.constants import BLEND_RGB_ADD
 from init_game import (
     blank,
     explosions,
@@ -467,11 +467,12 @@ class Ship:
 
 
     def shoot(self):
+        self.laser_posx, self.laser_posy = self.laser_pos()
         if self.y >= 0 and self.cool_down_counter == 0:
             if not self.butterfly_gun:
-                laser = Laser(self, self.laser_pos(), self.y, self.laser_vel, self.laser_img)
+                laser = Laser(self, self.laser_posx, self.laser_posy, self.laser_vel, self.laser_img)
             else:
-                laser = Laser(self, self.laser_pos(), self.y, self.laser_vel, random.choice(butterfly_lasers), butterfly=True)
+                laser = Laser(self, self.laser_posx, self.laser_posy, self.laser_vel, random.choice(butterfly_lasers), butterfly=True)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -490,7 +491,7 @@ class Ship:
 
 
     def laser_pos(self):
-        return int(self.x + self.get_width()/2 - self.laser_img.get_width()/2)
+        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), self.y)
 
 
     def get_width(self):
@@ -705,8 +706,9 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
 
     def shoot(self):
+        self.laser_posx, self.laser_posy = self.laser_pos()
         if self.y >= 0 and self.cool_down_counter == 0:
-            laser = BossLaser(self, self.laser_pos(), self.y, self.laser_vel, self.laser_img)
+            laser = BossLaser(self, self.laser_posx, self.laser_posy, self.laser_vel, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -749,6 +751,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             window.blit(self.ship_img, (self.x, self.y))
         
 
-
+    def laser_pos(self):
+        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + self.get_height() - self.laser_img.get_height()/2))
 
 

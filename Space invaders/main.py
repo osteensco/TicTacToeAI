@@ -16,14 +16,13 @@ from init_game import (
     title_font,
     lost_font,
     quadrant,
-    background,
     set_FPS,
     scroll_vel,
     enparmove,
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_ASSET_MAP, BOSS_WEAPON_MAP
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
 from classes import Background, Player, Boss, Enemy, Ship
 
 
@@ -79,8 +78,6 @@ def main_loop():
     def redraw_window():
         for bg in bgs:
             bg.draw(WIN)
-        # WIN.blit(background, (0, 0))  # background is anchored to top left corner
-        # draw text
         if player.lives == 1:
             lives_label = main_font.render(f"Shield Layers: {player.lives}", 1, (255, 0, 0))  # red for 1 life left
         else:
@@ -439,32 +436,25 @@ def main_loop():
 #             if event.type == pygame.KEYDOWN:
 #                 if event.key == pygame.K_RETURN:
 #                     main_menu()
+class GameSession():
+    def __init__(self) -> None:
+        pass#put main_loop function in here, variables are init in class, variables in settings should be passed to here when GameSession object is created
+
+
+
 
 class Menu():
     def __init__(self) -> None:
-        running = True
-        start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
+        self.running = True
+        self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         self.bgs = bgs
+        self.main_loop = main_loop
+        self.run()
 
     def run(self):
         while self.running:
-            dyn_background(bgs, scroll_vel/5, x_adj, y_adj)
-            for bg in bgs:
-                bg.draw(WIN)
-            start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
-            # settings_label = title_font.render("Press 's' for settings", 1, (255,255,255))
-            WIN.blit(start_label, (WIDTH/2 - start_label.get_width()/2, HEIGHT/2 - start_label.get_height()/2))
-            # WIN.blit(settings_label, (WIDTH / 2 - settings_label.get_width() / 2, (HEIGHT / 2 - settings_label.get_height() / 2) + start_label.get_height()))
-            pygame.display.update()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    main_menu_run = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        main_loop()
-                    # if event.key == pygame.K_s:
-                    #     settings_menu()
+            self.draw()
+            self.track_events()
         quit()
 
     def background(self):
@@ -480,36 +470,29 @@ class Menu():
     def track_events(self):
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    main_menu_run = False
+                    self.running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        main_loop()
+                        self.main_loop()
+
+
+
+class Settings(Menu):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fps = ['high', 'low']
+        self.difficulty = ['high', 'medium', 'low']
+        self.cameraview = ['player in middle', 'edge of screen']
+        self.music = True
+
+    
+class ViewHighScores():
+    def __init__(self) -> None:
+        super().__init__()
 
 
 
 
-
-def main_menu():#convert to a class at some point
-    main_menu_run = True
-    while main_menu_run:
-        dyn_background(bgs, scroll_vel/5, x_adj, y_adj)
-        for bg in bgs:
-            bg.draw(WIN)
-        start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
-        # settings_label = title_font.render("Press 's' for settings", 1, (255,255,255))
-        WIN.blit(start_label, (WIDTH/2 - start_label.get_width()/2, HEIGHT/2 - start_label.get_height()/2))
-        # WIN.blit(settings_label, (WIDTH / 2 - settings_label.get_width() / 2, (HEIGHT / 2 - settings_label.get_height() / 2) + start_label.get_height()))
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                main_menu_run = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    main_loop()
-                # if event.key == pygame.K_s:
-                #     settings_menu()
-    quit()
 
 if __name__ == '__main__':
-    main_menu()#starts game at main menu when game is opened
+    main_menu = Menu()#starts game at main menu when game is opened
