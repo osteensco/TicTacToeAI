@@ -752,6 +752,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         
 
     def laser_pos(self):
-        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + self.get_height() - self.laser_img.get_height()/2))
+        return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + (self.get_height() * 2/3)))
 
 
