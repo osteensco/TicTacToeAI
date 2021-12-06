@@ -6,7 +6,7 @@ pygame.font.init()
 #game window and fonts
 WIDTH, HEIGHT = 1080, 650
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Space Invaders!")
+pygame.display.set_caption("Space Defense")
 main_font = pygame.font.SysFont("comicsans", 50)
 lost_font = pygame.font.SysFont("comicsans", 100)
 #menu and in game messaging font

@@ -224,11 +224,9 @@ class GameSession():#put main_loop function in here, variables are init in class
 
     #checks if game has been lost
             if self.player.lives <= 0:
-                lost = True
-
-                if lost:
+                self.lost = True
+                if self.lost:
                     self.lost_count += 1
-
                 if self.lost_count > self.FPS * 4:
                     self.run = False
                 continue
@@ -250,7 +248,8 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.enemy_vel += 1
                     self.enemy_laser_vel += 2
                     self.enemy_power += 10
-                if self.level % 3 == 0 and self.level <= 10:
+                #spawn enemies and boss
+                if self.level % 1 == 0 and self.level <= 10:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
@@ -283,7 +282,7 @@ class GameSession():#put main_loop function in here, variables are init in class
 
                 for i in range(self.wave_length):
                     enemy = Enemy(
-                    random.randrange(0, WIDTH - 50), random.randrange(-1000-(100*self.level), 20),
+                    random.randrange(0, WIDTH - 50), random.randrange(-1500-(100*self.level), -10),
                     random.choice(list(COLOR_MAP)), self.enemy_vel, self.enemy_laser_vel, self.enemy_power*10, self.enemy_power
                     )
                     self.enemies.append(enemy)
@@ -405,7 +404,7 @@ class Menu():
         self.running = True
         self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         self.bgs = bgs
-        self.game = GameSession()
+        self.game = None
         self.run()
 
     def run(self):
@@ -413,6 +412,11 @@ class Menu():
             self.draw()
             self.track_events()
         quit()
+
+    def newgame(self):
+        self.game = GameSession()
+        self.game.main_loop()
+        self.game = None
 
     def background(self):
         dyn_background(self.bgs, scroll_vel/5, x_adj, y_adj)
@@ -430,7 +434,7 @@ class Menu():
                     self.running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        self.game.main_loop()
+                        self.newgame()
 
 
 

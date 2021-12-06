@@ -700,8 +700,19 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
         
     def shield_down(self):
+        self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
+        for r in range(random.randint(5, 8)):
+            rect = self.rect
+            rect.x += random.uniform(-self.ship_img.get_width(), 0)
+            rect.y += random.uniform(-self.ship_img.get_height(), 0)
+            for i in range(0, random.randint(30, 50)):
+                particle = ShieldHit(self.rect.centerx + random.uniform(-self.ship_img.get_width(), 0),
+                self.rect.centery + random.uniform(-self.ship_img.get_height(), 0)
+                )
+                self.particles.append(particle)
         self.immune = False
         self.mask = pygame.mask.from_surface(self.ship_img)
+        self.rect = None
 
 
     def move_assets(self):
