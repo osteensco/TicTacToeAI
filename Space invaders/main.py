@@ -23,12 +23,8 @@ from init_game import (
 
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
-from classes import Background, Player, Boss, Enemy, Ship
+from objects import Background, Player, Boss, Enemy, Ship
 
-
-
-#TO DO:
-#______add messages as things happen or levels/lives gained, lives lost, etc
 
 
 
@@ -218,7 +214,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.player.y -= self.player_vel
                 else:
                     self.player.y -= self.player.y
-            if keys[pygame.K_s] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement, buffer for healthbar
+            if keys[pygame.K_s] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement
                 self.player.y += self.player_vel
             if keys[pygame.K_SPACE]:
                 self.player.shoot()
@@ -246,38 +242,39 @@ class GameSession():#put main_loop function in here, variables are init in class
             if self.transition_count > self.FPS * 3:
                 self.scroll_vel -= 20
                 self.level += 1
-                self.wave_length += 1
+                if self.level <= 20:
+                    self.wave_length += 1
                 if self.level < 16 and self.level % 5 == 0:
                     self.scroll_vel += 1
                     self.player.lives += 1
                     self.enemy_vel += 1
                     self.enemy_laser_vel += 2
                     self.enemy_power += 10
-                if self.level % 1 == 0 and self.level <= 10:
+                if self.level % 3 == 0 and self.level <= 10:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
                     1,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*100, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*200, self.enemy_power
                     )
                     self.enemies.append(boss)
-                elif self.level % 3 == 0 and 10 <= self.level <= 18:
+                elif self.level % 2 == 0 and 10 <= self.level <= 18:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
                     2,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*100, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*300, self.enemy_power
                     )
                     self.enemies.append(boss)
-                elif self.level % 2 == 0 and self.level >= 20:
+                elif self.level % 1 == 0 and self.level >= 20:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
                     3,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*300, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*400, self.enemy_power
                     )
                     self.enemies.append(boss)
                 else: boss = None
@@ -373,7 +370,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                                     asset.health -= 10
                                     if asset.health <= 0:
                                         asset.drop_()
-                        if enemy.immune and len([s for s in enemy.assets if s.asset_type == "shield"]) == 0:
+                        if enemy.immune and len([s for s in enemy.assets if s.asset_type == "shield" and not s.destroyed]) == 0:
                             enemy.shield_down()
 
     #check player buff conditions and update stuff

@@ -311,9 +311,13 @@ class BossLaser(Laser):
             self.rect = self.img.get_rect(topleft=(self.x, self.y))
         self.explosion_time += 1
         self.img = random.choice(self.boom)
+        particle = Explosion(self.x + (self.img.get_width() / 4), self.y + (self.img.get_height() / 4))
+        self.particles.append(particle)
         window.blit(self.img,
             (self.rect.centerx + random.uniform(-self.img.get_width(), 0),
             self.rect.centery + random.uniform(-self.img.get_height(), 0)))
+
+
 #______________________________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
 
