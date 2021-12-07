@@ -51,8 +51,6 @@ class ShieldHit(Particle):
         self.y_vel = random.randint(-2, 2)
         self.burn_time = random.randint(10, 16)
         self.slinky = self.burn_time/2
-        self.orgin_x = x
-        self.origin_y = y
 
     def spark_effect(self):
         if self.burn_time > self.slinky:
@@ -71,6 +69,29 @@ class ShieldHit(Particle):
             surf.set_colorkey((0, 0, 0))
             window.blit(surf, (int(self.x)-int(self.burn_time), int(self.y)-int(self.burn_time)))
 
+
+class Smoke(Particle):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.grey = random.randint(0, 180)
+        self.color = (self.grey, self.grey, self.grey, 150)
+        self.x_vel = random.randint(-2, 2)
+        self.y_vel = random.randint(-2, 2)
+        self.burn_time = random.randint(16, 20)
+
+    def spark_effect(self):
+        self.x += self.x_vel
+        self.y += self.y_vel
+        self.x_vel *= .8
+        self.y_vel *= .8
+        self.burn_time -= .4
+
+    def draw(self, window):
+        if self.burn_time >= 0:
+            surf = pygame.Surface((int(self.burn_time*2), int(self.burn_time*2)), pygame.SRCALPHA)
+            pygame.draw.circle(surf, self.color, (int(self.burn_time), int(self.burn_time)), int(self.burn_time))
+            surf.set_colorkey((0, 0, 0))
+            window.blit(surf, (int(self.x)-int(self.burn_time), int(self.y)-int(self.burn_time)))
 
 
 class Spark(Particle):
@@ -356,6 +377,7 @@ class Ship:
         self.destroyed = False
         self.particles = []
         self.rects = []
+        self.exploding = False
         self.explosion_time = 0
         self.width = 0
         self.height = 0
@@ -394,26 +416,26 @@ class Ship:
                         self.left = False
 
 
-    def explode(self, window, set_FPS):
+    def explode(self, window, rect):
         self.explosion_time += 1
         expl = random.choice(self.boom)
-        self.x = self.rect.centerx + random.uniform(-expl.get_width(), 0)
-        self.y = self.rect.centery + random.uniform(-expl.get_height(), 0)
+        self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
+        self.y = rect.centery + random.uniform(-expl.get_height(), 0)
         window.blit(expl, (self.x, self.y))
         particle = Explosion(self.x + (self.ship_img.get_width() / 4), self.y + (self.ship_img.get_height() / 4))
         self.particles.append(particle)
-        self.rect = expl.get_rect(topleft=(self.x, self.y))
-        if self.explosion_time > set_FPS / 3:
-            window.blit(self.ship_img, (self.x, self.y))
+
+
         
 
     def draw(self, window, set_FPS):
         if not self.destroyed:
             window.blit(self.ship_img, (self.x, self.y))
         elif self.explosion_time > set_FPS / 3:
+            self.exploding = False
             window.blit(self.ship_img, (self.x, self.y))
-        else:
-            self.explode(window, set_FPS)
+        elif self.exploding:
+            self.explode(window, self.rect)
         for laser in self.lasers:
             laser.draw(window)
             if not laser.moving and not laser.particles:
@@ -446,6 +468,7 @@ class Ship:
         if random.randint(range_low, range_high) > threshold:
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
+            self.exploding = True
         if self.rect == None:
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
         self.ship_img = self.clear_img
@@ -485,11 +508,11 @@ class Ship:
         if collide(self, obj):
             if not self.immune:
                 for i in range(0, random.randint(30, 50)):
-                    particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
+                    particle = Explosion(self.x + (self.ship_img.get_width() / 4), self.y)
                     self.particles.append(particle)
             else:
                 for i in range(0, random.randint(30, 50)):
-                    particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
+                    particle = ShieldHit(self.x + (self.ship_img.get_width() / 4), self.y)
                     self.particles.append(particle)
             return True
 
@@ -651,7 +674,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
             pygame.draw.rect(window, (255, 255, 0), (380, 10, 350 * (self.health - self.max_health) / self.max_health, 40))
         
 
-
     def draw(self, window, set_FPS):
         self.healthbar(window)
         if not self.destroyed and not self.immune:
@@ -659,7 +681,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         elif not self.destroyed and self.immune:
             window.blit(self.shieldup_img, (self.x, self.y))
         elif self.explosion_time <= set_FPS:
-            self.explode(window, set_FPS)
+            self.explode()
         for laser in self.lasers:
             laser.draw(window)
         for drop in self.drops:
@@ -693,7 +715,6 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                 self.assets.append(asset)
         
 
-    
     def asset_mechanic(self):
         for f in self.asset_mechs:
             f(self)
@@ -745,32 +766,31 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         if random.randint(range_low, range_high) > threshold:
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
-        if self.rect == None:
-            self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
-            for r in range(random.randint(3, 5)):
-                rect = self.rect
-                self.rects.append(rect)
-        self.ship_img = self.clear_img
         self.mask = None
         self.destroyed = True
 
 
-    def explode(self, window, set_FPS):
+    def explode(self):
         self.explosion_time += 1
-        for rect in self.rects:
-            expl = random.choice(self.boom)
-            self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
-            self.y = rect.centery + random.uniform(-expl.get_height(), 0)
-            window.blit(expl, (self.x, self.y))
-            particle = Explosion(self.x + (expl.get_width() / 4), self.y + (expl.get_height() / 4))
-            self.particles.append(particle)
-            rect = expl.get_rect(topleft=(self.x, self.y))
-        super().explode(window, set_FPS)
-        if self.explosion_time > set_FPS / 3:
-            window.blit(self.ship_img, (self.x, self.y))
-        
+        if self.explosion_time % 10 == 0:
+            self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
+            for r in range(random.randint(8, 10)):
+                rect = self.rect
+                rect.x += random.uniform(-self.ship_img.get_width()/4, self.ship_img.get_width()/4)
+                rect.y += random.uniform(-self.ship_img.get_height()/4, self.ship_img.get_height()/4)
+                for i in range(0, random.randint(15, 25)):
+                    particle = Explosion(self.rect.centerx + random.uniform(-20, 20),
+                    self.rect.centery + random.uniform(-20, 20)
+                    )
+                    self.particles.append(particle)
+                for i in range(0, random.randint(1, 3)):
+                    particle = Smoke(self.rect.centerx + random.uniform(-20, 20),
+                    self.rect.centery + random.uniform(-20, 20)
+                    )
+                    self.particles.append(particle)
+            self.rect = None
+
 
     def laser_pos(self):
         return (int(self.x + self.get_width()/2 - self.laser_img.get_width()/2), int(self.y + (self.get_height() - self.laser_img.get_height())))
-
 

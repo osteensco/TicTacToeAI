@@ -66,7 +66,7 @@ def dyn_background(bgs, vel, x_adj, y_adj):
 
 #drop effects as functions
 def health_buff(obj):
-    obj.score += 1
+    obj.score += 200
     if obj.health < obj.max_health or obj.lives > 9:
         obj.health = obj.max_health
     elif obj.lives < 10:
@@ -74,26 +74,34 @@ def health_buff(obj):
         obj.health = 50
 
 def fire_rate_buff(obj):
-    obj.score += 1
-    if obj.COOLDOWN > 5:
-        obj.COOLDOWN -= 2
-    if obj.COOLDOWN % 5 == 0 and obj.laser_vel >= -25:
-        obj.laser_vel -= 1
+    obj.score += 200
+    if not obj.butterfly_gun:
+        if obj.COOLDOWN > 5:
+            obj.COOLDOWN -= 2
+        if obj.COOLDOWN % 5 == 0 and obj.laser_vel >= -25:
+            obj.laser_vel -= 1
+        else:
+            obj.score += 1000
     else:
-        obj.score += 1
+        if obj.origin_cool > 5:
+            obj.origin_cool -= 2
+        if obj.origin_cool % 5 == 0 and obj.laser_vel >= -25:
+            obj.laser_vel -= 1
+        else:
+            obj.score += 1000
 
 def shield_buff(obj):
-    obj.score += 5
+    obj.score += 500
     if obj.shield_timer <= set_FPS*8:
         obj.immune = True
         obj.shield_timer += set_FPS*shield_base_time
         obj.ship_img = obj.ship_shield
         obj.mask = obj.shield_mask
     else:
-        obj.score += 1
+        obj.score += 1000
 
 def butterfly_gun_buff(obj):
-    obj.score += 5
+    obj.score += 500
     if not obj.butterfly_gun:
         obj.origin_cool = obj.COOLDOWN
         obj.COOLDOWN = 0

@@ -23,7 +23,7 @@ from init_game import (
 
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
-from objects import Background, Player, Boss, Enemy, Ship
+from objects import Background, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
 
@@ -264,7 +264,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     random.choice(list(BOSS_COLOR_MAP)),
                     2,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*300, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*250, self.enemy_power
                     )
                     self.enemies.append(boss)
                 elif self.level % 1 == 0 and self.level >= 20:
@@ -273,7 +273,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     random.choice(list(BOSS_COLOR_MAP)),
                     3,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*400, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*300, self.enemy_power
                     )
                     self.enemies.append(boss)
                 else: boss = None
@@ -320,7 +320,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                 if enemy.destroyed:#initiates drop movement and removes enemy when drops expire/taken
                     for drop in enemy.drops:
                         enemy.move_drops(drop.vel, self.player)
-                    if not enemy.drops and not enemy.lasers and not enemy.assets:
+                    if not enemy.drops and not enemy.lasers and not enemy.particles and not enemy.assets:
                         if type(enemy).__name__ != "Boss":
                             self.enemies.remove(enemy)
                         elif enemy.explosion_time > set_FPS:
@@ -331,10 +331,19 @@ class GameSession():#put main_loop function in here, variables are init in class
                         self.player.score -= 20
                         self.player.health -= enemy.power
                         enemy.drop_()
+                        for i in range(0, random.randint(10, 30)):
+                            particle = Explosion(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                            spark = Spark(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                            enemy.particles.append(particle)
+                            enemy.particles.append(spark)
                     if self.player.immune:
                         self.player.score += enemy.max_health*2
                         enemy.drop_()
-
+                        for i in range(0, random.randint(10, 30)):
+                            particle = Explosion(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                            spark = Spark(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                            enemy.particles.append(particle)
+                            enemy.particles.append(spark)
                 if type(enemy).__name__ == "Boss":
                     if not enemy.destroyed and collide(enemy, self.player):
                         if not self.player.immune:
@@ -344,10 +353,15 @@ class GameSession():#put main_loop function in here, variables are init in class
                             enemy.health -= 1
                             if enemy.health <= 0:
                                 enemy.drop_()
+                                for i in range(0, random.randint(10, 30)):
+                                    particle = Explosion(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                                    spark = Spark(enemy.x + (enemy.ship_img.get_width() / 4), enemy.y)
+                                    enemy.particles.append(particle)
+                                    enemy.particles.append(spark)                          
                     enemy.move_assets()
                     if enemy.assets:
-                        if "drone" in enemy.asset_type:
-                            enemy.asset_spawn_rate -= 1
+                        if [s for s in enemy.assets if s.asset_type == "drone" and not s.destroyed]:
+                            enemy.asset_spawn_rate -= 1#asset_spawn_rate inits at > 0 and counts down to 0
                             if enemy.asset_spawn_rate <= 0 and len(self.enemies) <= 20:
                                 enemy.asset_mechanic()
                                 drone = Ship(enemy.x, enemy.y, self.enemy_vel, self.enemy_laser_vel*2, enemy.power/4)
@@ -369,6 +383,12 @@ class GameSession():#put main_loop function in here, variables are init in class
                                     asset.health -= 10
                                     if asset.health <= 0:
                                         asset.drop_()
+                                        for i in range(0, random.randint(10, 30)):
+                                            particle = Explosion(asset.x + (asset.ship_img.get_width() / 4), asset.y)
+                                            spark = Spark(asset.x + (asset.ship_img.get_width() / 4), asset.y)
+                                            asset.particles.append(particle)
+                                            asset.particles.append(spark)
+
                         if enemy.immune and len([s for s in enemy.assets if s.asset_type == "shield" and not s.destroyed]) == 0:
                             enemy.shield_down()
 
