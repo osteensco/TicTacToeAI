@@ -12,6 +12,7 @@ from init_game import (
 
 
 
+
 #check for objects colliding
 def collide(obj1, obj2):
     offset_x = obj2.x - obj1.x

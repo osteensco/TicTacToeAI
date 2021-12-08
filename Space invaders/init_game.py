@@ -30,6 +30,9 @@ def load_image(folder, image_name):
     image = image.convert_alpha()
     return image
 
+def load_sound(folder, sound_name):
+    sound = pygame.mixer.Sound(os.path.join(folder, sound_name))
+    return sound
 
 #background
 background = pygame.transform.scale(load_image("assets", "background-black.png"), (WIDTH, HEIGHT))
@@ -134,3 +137,11 @@ blue_laser = load_image("assets", "pixel_laser_blue.png")
 yellow_laser = load_image("assets", "pixel_laser_yellow.png")
 butterfly_lasers = [red_laser, green_laser, blue_laser, yellow_laser]
 
+
+
+
+#Load Sound and Music
+start_song = os.path.join("soundfx and music", "keys-of-moon-sleepless-city.mp3")
+song1 = os.path.join("electronic-senses-linear-phase.mp3")
+song2 = os.path.join("diamond-ace-runaway.mp3")
+songs = [song1, song2]

@@ -19,12 +19,14 @@ from init_game import (
     set_FPS,
     scroll_vel,
     enparmove,
+    start_song,
+    songs,
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
 from objects import Background, Player, Boss, Enemy, Ship, Explosion, Spark
-
+pygame.init() 
 
 
 
@@ -37,7 +39,8 @@ bgs = [bg1, bg2, bg3, bg4]
 
 
 class GameSession():#put main_loop function in here, variables are init in class, variables in settings should be passed to here when GameSession object is created
-    def __init__(self) -> None:
+    def __init__(self, parent) -> None:
+        self.parent = parent
         self.scroll_vel = scroll_vel
         self.FPS = set_FPS
         self.run = True
@@ -131,6 +134,8 @@ class GameSession():#put main_loop function in here, variables are init in class
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
+                if event.type == self.parent.MUSIC_END:
+                    self.parent.music.next_song()
             # ________movement block, outside of event loop so that movement is less clunky
             keys = pygame.key.get_pressed()  # creates a variable to track key presses, checks based on FPS value. This block is where controls live.
             if keys[pygame.K_a]:
@@ -425,6 +430,9 @@ class Menu():
         self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         self.bgs = bgs
         self.game = None
+        self.MUSIC_END = pygame.USEREVENT+1
+        self.music = Music()
+        pygame.mixer.music.set_endevent(self.MUSIC_END)
         self.run()
 
     def run(self):
@@ -434,7 +442,7 @@ class Menu():
         quit()
 
     def newgame(self):
-        self.game = GameSession()
+        self.game = GameSession(self)
         self.game.main_loop()
         self.game = None
 
@@ -455,6 +463,8 @@ class Menu():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         self.newgame()
+                if event.type == self.MUSIC_END:
+                    self.music.next_song()
 
 
 
@@ -465,14 +475,30 @@ class Settings(Menu):
         self.difficulty = ['high', 'medium', 'low']
         self.cameraview = ['player in middle', 'edge of screen']
         self.music = True
+        self.volume = 0
+
 
     
 class ViewHighScores():
     def __init__(self) -> None:
-        super().__init__()
+        pass
 
 
+class Music():
+    def __init__(self) -> None:
+        self.currently_playing = start_song
+        self.next = None
+        self.songs = songs
+        pygame.mixer.music.load(start_song)
+        pygame.mixer.music.play()
 
+    def next_song(self):
+        self.next = random.choice(songs)
+        while self.next == self.currently_playing:
+            self.next = random.choice(songs)
+        self.currently_playing = self.next
+        pygame.mixer.music.load(self.next)
+        pygame.mixer.music.play()
 
 
 if __name__ == '__main__':
