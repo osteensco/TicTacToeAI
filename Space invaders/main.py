@@ -458,14 +458,13 @@ class Menu():
 
     def track_events(self):
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        self.newgame()
-                if event.type == self.MUSIC_END:
-                    self.music.next_song()
-
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    self.newgame()
+            if event.type == self.MUSIC_END:
+                self.music.next_song()
 
 
 class Settings(Menu):
@@ -478,7 +477,6 @@ class Settings(Menu):
         self.volume = 0
 
 
-    
 class ViewHighScores():
     def __init__(self) -> None:
         pass
@@ -487,18 +485,23 @@ class ViewHighScores():
 class Music():
     def __init__(self) -> None:
         self.currently_playing = start_song
-        self.next = None
+        self.index = -1
         self.songs = songs
-        pygame.mixer.music.load(start_song)
+        self.shuffle_songs()
+        pygame.mixer.music.load(self.currently_playing)
         pygame.mixer.music.play()
 
     def next_song(self):
-        self.next = random.choice(songs)
-        while self.next == self.currently_playing:
-            self.next = random.choice(songs)
-        self.currently_playing = self.next
-        pygame.mixer.music.load(self.next)
+        self.index += 1
+        if self.index >= len(self.songs):
+            self.index = 0
+        self.currently_playing = self.songs[self.index]
+        pygame.mixer.music.load(self.currently_playing)
         pygame.mixer.music.play()
+
+    def shuffle_songs(self):
+        random.shuffle(self.songs)
+        self.songs.append(start_song)
 
 
 if __name__ == '__main__':

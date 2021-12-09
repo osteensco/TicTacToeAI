@@ -141,7 +141,11 @@ butterfly_lasers = [red_laser, green_laser, blue_laser, yellow_laser]
 
 
 #Load Sound and Music
-start_song = os.path.join("soundfx and music", "keys-of-moon-sleepless-city.mp3")
-song1 = os.path.join("electronic-senses-linear-phase.mp3")
-song2 = os.path.join("diamond-ace-runaway.mp3")
-songs = [song1, song2]
+start_song = os.path.join("soundfx and music", "keys-of-moon-sleepless-city.wav")
+song1 = os.path.join("soundfx and music", "electronic-senses-linear-phase.wav")
+song2 = os.path.join("soundfx and music", "diamond-ace-runaway.wav")
+song3 = os.path.join("soundfx and music", "sakura-hz-neon-samurai.wav")
+song4 = os.path.join("soundfx and music", "bettogh-orbital-strike.wav")
+song5 = os.path.join("soundfx and music", "pyc-music-untitled-song-thing.wav")
+song6 = os.path.join("soundfx and music", "electronic-senses-anemona.wav")
+songs = [song1, song2, song3, song4, song5, song6]
