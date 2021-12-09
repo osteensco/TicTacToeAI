@@ -401,6 +401,7 @@ class Ship:
         self.rect = None
         self.reflect = False
         self.explosion_sound = explosion_sound1
+        self.explosion_sound2 = explosion_sound2
         
 
 
@@ -411,11 +412,11 @@ class Ship:
             if not self.direction:
                 self.y -= vel*2
             if self.right:
-                if self.x + self.get_width() < WIDTH+150:
+                if self.x + self.get_width() < WIDTH+500:
                     self.x += parallel
                 self.move_time -= 1
             if self.left:
-                if self.x > -150:
+                if self.x > -500:
                     self.x -= parallel
                 self.move_time -= 1
             if self.move_time == 0:
@@ -435,9 +436,12 @@ class Ship:
 
 
     def explode(self, window, rect):
-        self.explosion_sound.stop()
-        self.explosion_sound.play()
         self.explosion_time += 1
+        if self.explosion_time == 1:
+            if self.explosion_sound.get_num_channels() <= 1:
+                self.explosion_sound.play()
+            else:
+                self.explosion_sound2.play()
         expl = random.choice(self.boom)
         self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
         self.y = rect.centery + random.uniform(-expl.get_height(), 0)
