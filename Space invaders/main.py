@@ -26,7 +26,7 @@ from init_game import (
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
 from objects import Background, Player, Boss, Enemy, Ship, Explosion, Spark
-pygame.init() 
+
 
 
 

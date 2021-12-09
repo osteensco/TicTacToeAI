@@ -9,7 +9,14 @@ from init_game import (
     yellow_laser,
     butterfly_lasers,
     HEIGHT,
-    WIDTH
+    WIDTH,
+    explosion_sound1,
+    explosion_sound2,
+    explosion_sound3,
+    drop_effect_sound,
+    laser_player_sound,
+    laser_sound,
+
 )
 from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
 from helper_functions import collide
@@ -157,6 +164,7 @@ class Drop:
         self.mask = pygame.mask.from_surface(self.img)
         self.vel = 1
         self.angle = 0
+        self.effect_sound = drop_effect_sound
 
     def img_rotate(self, img, angle):
         self.angle += self.vel
@@ -172,7 +180,12 @@ class Drop:
         return not(self.y <= height and self.y > -1)
 
     def collision(self, obj):
-        return collide(self, obj)
+        if collide(self, obj):
+            self.effect_sound.stop()
+            self.effect_sound.play()
+            return True
+        else:
+            return False
 
 
 #______________________________________________________________________________________________________________________
@@ -283,6 +296,7 @@ class BossLaser(Laser):
         self.boom = explosions
         self.exploding = False
         self.explosion_time = 0
+        self.explosion_sound = explosion_sound2
 
 
     def img_rotate(self, img, angle):
@@ -328,6 +342,8 @@ class BossLaser(Laser):
             return True
 
     def explode(self, window):
+        self.explosion_sound.stop()
+        self.explosion_sound.play()
         if self.rect == None:
             self.rect = self.img.get_rect(topleft=(self.x, self.y))
         self.explosion_time += 1
@@ -355,6 +371,7 @@ class Ship:
         self.ship_img = None
         self.mask = None
         self.laser_img = None
+        self.laser_sound = laser_sound
         self.power = 20
         self.lasers = []
         self.cool_down_counter = 0
@@ -383,6 +400,7 @@ class Ship:
         self.height = 0
         self.rect = None
         self.reflect = False
+        self.explosion_sound = explosion_sound1
         
 
 
@@ -393,11 +411,11 @@ class Ship:
             if not self.direction:
                 self.y -= vel*2
             if self.right:
-                if self.x + self.get_width() < WIDTH:
+                if self.x + self.get_width() < WIDTH+150:
                     self.x += parallel
                 self.move_time -= 1
             if self.left:
-                if self.x > -1:
+                if self.x > -150:
                     self.x -= parallel
                 self.move_time -= 1
             if self.move_time == 0:
@@ -417,6 +435,8 @@ class Ship:
 
 
     def explode(self, window, rect):
+        self.explosion_sound.stop()
+        self.explosion_sound.play()
         self.explosion_time += 1
         expl = random.choice(self.boom)
         self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
@@ -494,8 +514,10 @@ class Ship:
 
 
     def shoot(self):
-        self.laser_posx, self.laser_posy = self.laser_pos()
         if self.y >= 0 and self.cool_down_counter == 0:
+            self.laser_sound.stop()
+            self.laser_sound.play()
+            self.laser_posx, self.laser_posy = self.laser_pos()
             if not self.butterfly_gun:
                 laser = Laser(self, self.laser_posx, self.laser_posy, self.laser_vel, self.laser_img)
             else:
@@ -546,6 +568,7 @@ class Player(Ship):
         self.ship_img = player_space_ship
         self.laser_img = yellow_laser
         self.laser_vel = -15
+        self.laser_sound = laser_player_sound
         self.default_mask = pygame.mask.from_surface(self.ship_img)
         self.mask = self.default_mask
         self.ship_shield = player_ship_shield
@@ -659,6 +682,8 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.move_time = 0
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
+        self.explosion_sound = explosion_sound3
+        self.laser_sound = laser_player_sound
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.add_assets()
         
@@ -746,8 +771,10 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
 
     def shoot(self):
-        self.laser_posx, self.laser_posy = self.laser_pos()
         if self.y >= 0 and self.cool_down_counter == 0:
+            self.laser_sound.stop()
+            self.laser_sound.play()
+            self.laser_posx, self.laser_posy = self.laser_pos()
             laser = BossLaser(self, self.laser_posx, self.laser_posy, self.laser_vel, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
@@ -773,6 +800,8 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
     def explode(self):
         self.explosion_time += 1
         if self.explosion_time % 10 == 0:
+            self.explosion_sound.stop()
+            self.explosion_sound.play()
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
             for r in range(random.randint(8, 10)):
                 rect = self.rect

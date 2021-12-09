@@ -1,6 +1,8 @@
 import pygame
 import os
+pygame.init()
 pygame.font.init()
+pygame.mixer.init()
 
 
 #game window and fonts
@@ -30,8 +32,9 @@ def load_image(folder, image_name):
     image = image.convert_alpha()
     return image
 
-def load_sound(folder, sound_name):
+def load_sound(folder, sound_name, vol=.5):
     sound = pygame.mixer.Sound(os.path.join(folder, sound_name))
+    sound.set_volume(vol)
     return sound
 
 #background
@@ -149,3 +152,11 @@ song4 = os.path.join("soundfx and music", "bettogh-orbital-strike.wav")
 song5 = os.path.join("soundfx and music", "pyc-music-untitled-song-thing.wav")
 song6 = os.path.join("soundfx and music", "electronic-senses-anemona.wav")
 songs = [song1, song2, song3, song4, song5, song6]
+
+explosion_sound1 = load_sound("soundfx and music", "explosion1.wav")
+explosion_sound2 = load_sound("soundfx and music", "explosion2.wav")
+explosion_sound3 = load_sound("soundfx and music", "explosion3.wav", vol=1)
+laser_player_sound = load_sound("soundfx and music", "laser_player.wav")
+laser_sound = load_sound("soundfx and music", "laser.wav")
+drop_effect_sound = load_sound("soundfx and music", "drop_effect.wav")
+
