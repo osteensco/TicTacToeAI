@@ -15,6 +15,7 @@ from init_game import (
     explosion_sound3,
     drop_effect_sound,
     laser_player_sound,
+    laser_boss_sound,
     laser_sound,
 
 )
@@ -437,11 +438,6 @@ class Ship:
 
     def explode(self, window, rect):
         self.explosion_time += 1
-        if self.explosion_time == 1:
-            if self.explosion_sound.get_num_channels() <= 1:
-                self.explosion_sound.play()
-            else:
-                self.explosion_sound2.play()
         expl = random.choice(self.boom)
         self.x = rect.centerx + random.uniform(-expl.get_width(), 0)
         self.y = rect.centery + random.uniform(-expl.get_height(), 0)
@@ -493,6 +489,9 @@ class Ship:
             drop = Drop(self.x + int(self.get_width()/2), self.y, random.choice(list(DROP_MAP)))
             self.drops.append(drop)
             self.exploding = True
+            self.explosion_sound.play()
+        else:
+            self.explosion_sound2.play()
         if self.rect == None:
             self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
         self.ship_img = self.clear_img
@@ -690,7 +689,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.width = self.ship_img.get_width()
         self.height = self.ship_img.get_height()
         self.explosion_sound = explosion_sound3
-        self.laser_sound = laser_player_sound
+        self.laser_sound = laser_boss_sound
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.add_assets()
         

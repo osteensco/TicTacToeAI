@@ -114,18 +114,17 @@ class GameSession():#put main_loop function in here, variables are init in class
                 WIDTH / 2 - transition_level_label.get_width() / 2,
                 HEIGHT / 2 - transition_level_label.get_height() / 2))
 
-        if self.pause:
-            pause_label = title_font.render("Game Paused", 1,(255, 255, 255))
-            WIN.blit(pause_label, (
-                WIDTH / 2 - pause_label.get_width() / 2,
-                HEIGHT / 2 - pause_label.get_height() / 2))
-
-            
 
         for enemy in self.enemies:
             enemy.draw(WIN, set_FPS)
 
         self.player.draw(WIN, set_FPS)
+
+        if self.pause:
+            pause_label = title_font.render("Game Paused", 1,(255, 255, 255))
+            WIN.blit(pause_label, (
+                (WIDTH / 2) - (pause_label.get_width() / 2),
+                (HEIGHT / 2) - (pause_label.get_height()*2)))
 
         if self.lost:
             lost_label = lost_font.render("GAME OVER", 1, (255, 0, 0))
@@ -263,22 +262,25 @@ class GameSession():#put main_loop function in here, variables are init in class
                 self.level += 1
                 if self.level <= 20:
                     self.wave_length += 1
-                if self.level < 16 and self.level % 5 == 0:
+                if self.level % 5 == 0:
                     self.scroll_vel += 1
                     self.player.lives += 1
-                    self.enemy_vel += 1
-                    self.enemy_laser_vel += 2
-                    self.enemy_power += 10
+                    if self.level < 16:
+                        self.enemy_vel += 1
+                        self.enemy_laser_vel += 2
+                        self.enemy_power += 10
+
                 #spawn enemies and boss
-                if self.level % 1 == 0 and self.level <= 10:
+                if self.level % 3 == 0 and self.level >= 20:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
-                    1,
+                    3,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*200, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*250, self.enemy_power
                     )
                     self.enemies.append(boss)
+                
                 elif self.level % 2 == 0 and 10 <= self.level <= 18:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
@@ -288,15 +290,17 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.enemy_vel, self.enemy_laser_vel, self.enemy_power*250, self.enemy_power
                     )
                     self.enemies.append(boss)
-                elif self.level % 1 == 0 and self.level >= 20:
+
+                elif self.level % 1 == 0 and self.level >= 3:
                     boss = Boss(
                     500, (-1500-(100*self.level)),
                     random.choice(list(BOSS_COLOR_MAP)),
-                    3,
+                    1,
                     random.choice(list(BOSS_WEAPON_MAP)),
-                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*300, self.enemy_power
+                    self.enemy_vel, self.enemy_laser_vel, self.enemy_power*200, self.enemy_power
                     )
                     self.enemies.append(boss)
+
                 else: boss = None
 
                 self.transition_count = 0

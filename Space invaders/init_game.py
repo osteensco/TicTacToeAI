@@ -26,7 +26,7 @@ player_vel = 10
 enemy_power = 10
 
 
-#func to load images
+#func to load images and sounds
 def load_image(folder, image_name):
     image = pygame.image.load(os.path.join(folder, image_name))
     image = image.convert_alpha()
@@ -153,10 +153,11 @@ song5 = os.path.join("soundfx and music", "pyc-music-untitled-song-thing.wav")
 song6 = os.path.join("soundfx and music", "electronic-senses-anemona.wav")
 songs = [song1, song2, song3, song4, song5, song6]
 
-explosion_sound1 = load_sound("soundfx and music", "explosion1.wav", vol=1)
-explosion_sound2 = load_sound("soundfx and music", "explosion2.wav")
+explosion_sound1 = load_sound("soundfx and music", "explosion1.wav", vol=.8)
+explosion_sound2 = load_sound("soundfx and music", "explosion2.wav", vol=.8)
 explosion_sound3 = load_sound("soundfx and music", "explosion3.wav", vol=1)
-laser_player_sound = load_sound("soundfx and music", "laser_player.wav", vol=.25)
+laser_player_sound = load_sound("soundfx and music", "laser_player.wav", vol=.5)
+laser_boss_sound = load_sound("soundfx and music", "laser_boss.wav", vol=.2)
 laser_sound = load_sound("soundfx and music", "laser.wav")
 drop_effect_sound = load_sound("soundfx and music", "drop_effect.wav")
 
