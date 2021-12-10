@@ -160,4 +160,6 @@ laser_player_sound = load_sound("soundfx and music", "laser_player.wav", vol=.5)
 laser_boss_sound = load_sound("soundfx and music", "laser_boss.wav", vol=.2)
 laser_sound = load_sound("soundfx and music", "laser.wav")
 drop_effect_sound = load_sound("soundfx and music", "drop_effect.wav")
-
+shield_hit_sound = load_sound("soundfx and music", "shield_hit_sound.wav")
+shield_down_sound = load_sound("soundfx and music", "shield_down_sound.wav")
+reflect_sound = load_sound("soundfx and music", "reflect_sound.wav")

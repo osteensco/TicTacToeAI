@@ -149,7 +149,7 @@ def laser_mechanic(boss, laser, obj):
 
 
 def shotgun_mechanic(boss, laser, obj):
-    if laser.off_screen(HEIGHT, WIDTH):
+    if laser.off_screen(HEIGHT, WIDTH+100):
         boss.lasers.remove(laser)
     if laser.collision(obj):
         if not obj.immune:

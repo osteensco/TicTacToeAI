@@ -51,7 +51,7 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.enemy_power = 10
         self.enemy_vel = 1
         self.enemy_laser_vel = 4
-        self.player_vel = 10#___variable to determine how many pixels per keystroke player moves
+        self.player_vel = 10#variable to determine how many pixels per keystroke player moves
         self.player = Player(int(WIDTH/2) - int(player_space_ship.get_width()/2),
                         HEIGHT - player_space_ship.get_height() - 20, self.player_vel)#adjusted player position to be dynamic to window and ship size
         self.clock = pygame.time.Clock()
@@ -445,35 +445,37 @@ class GameSession():#put main_loop function in here, variables are init in class
 
 
 class Menu():
-    def __init__(self) -> None:
+    def __init__(self, app) -> None:
+        self.parent = app
         self.running = True
         self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         self.bgs = bgs
-        self.game = None
-        self.MUSIC_END = pygame.USEREVENT+1
-        self.music = Music()
-        pygame.mixer.music.set_endevent(self.MUSIC_END)
         self.run()
 
     def run(self):
         while self.running:
-            self.draw()
-            self.track_events()
+            if not self.parent.settings.running or not self.parent.highscores.running:
+                self.draw()
+                self.track_events()
+            elif self.parent.settings.running:
+                self.parent.settings.run()
+            elif self.parent.highscores.running:
+                self.parent.highscores.run()
         quit()
-
-    def newgame(self):
-        self.game = GameSession(self)
-        self.game.main_loop()
-        self.game = None
-
+    
     def background(self):
         dyn_background(self.bgs, scroll_vel/5, x_adj, y_adj)
         for bg in self.bgs:
             bg.draw(WIN)
 
+    def display(self):
+        WIN.blit(self.start_label,
+        (WIDTH/2 - self.start_label.get_width()/2,
+        HEIGHT/2 - self.start_label.get_height()/2))
+        
     def draw(self):
         self.background()
-        WIN.blit(self.start_label, (WIDTH/2 - self.start_label.get_width()/2, HEIGHT/2 - self.start_label.get_height()/2))
+        self.display()
         pygame.display.update()
 
     def track_events(self):
@@ -482,25 +484,48 @@ class Menu():
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    self.newgame()
-            if event.type == self.MUSIC_END:
-                self.music.next_song()
+                    self.parent.newgame()
+            if event.type == self.parent.MUSIC_END:
+                self.parent.music.next_song()
+
+    def nav_settings(self):
+        self.parent.seetings.running = True
+
+    def nav_view_scores(self):
+        self.parent.highscores.running = True
 
 
 class Settings(Menu):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, app) -> None:
+        super().__init__(app)
+        self.running = False
         self.fps = ['high', 'low']
         self.difficulty = ['high', 'medium', 'low']
         self.cameraview = ['player in middle', 'edge of screen']
         self.music = True
         self.volume = 0
 
+    def run(self):
+        self.draw()
+        self.track_events()
+
+    def track_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == self.parent.MUSIC_END:
+                self.parent.music.next_song()
+
+    def nav_main_menu(self):
+        self.running = False
+
 
 class ViewHighScores():
-    def __init__(self) -> None:
-        pass
+    def __init__(self, app) -> None:
+        self.running = False
 
+    def nav_main_menu(self):
+        self.running = False
 
 class Music():
     def __init__(self) -> None:
@@ -524,7 +549,23 @@ class Music():
         self.songs.append(start_song)
 
 
+class App():
+    def __init__(self) -> None:
+        self.music = Music()
+        self.MUSIC_END = pygame.USEREVENT+1
+        pygame.mixer.music.set_endevent(self.MUSIC_END)
+        self.settings = Settings(self)
+        self.highscores = ViewHighScores(self)
+        self.main_menu = Menu(self)#starts game at main menu when game is opened
+        self.game = None
+
+    def newgame(self):
+        self.game = GameSession(self)
+        self.game.main_loop()
+        #self.game.record()
+        self.game = None
+
 if __name__ == '__main__':
-    main_menu = Menu()#starts game at main menu when game is opened
+    start_app = App()
 
 

@@ -17,6 +17,9 @@ from init_game import (
     laser_player_sound,
     laser_boss_sound,
     laser_sound,
+    shield_hit_sound,
+    shield_down_sound,
+    reflect_sound
 
 )
 from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
@@ -210,6 +213,8 @@ class Laser:
         self.colpoint = ()
         self.butterfly_dir, self.butterfly_vel = self.butterfly_stats()
         self.angle = 0
+        self.shield_hit_sound = shield_hit_sound
+        self.reflect_sound = reflect_sound
     
 
     def butterfly_stats(self):
@@ -255,7 +260,7 @@ class Laser:
         self.x -= self.butterfly_vel
 
     def off_screen(self, height, width):#___determines if laser if off screen
-        if width >= self.x > -1:
+        if width >= self.x > -100:
             return not (height >= self.y > 0)
         else:
             return not (width >= self.x > -1)
@@ -269,10 +274,12 @@ class Laser:
                         particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
                         self.particles.append(particle)
                 else:
+                    self.reflect_sound.play()
                     for i in range(0, random.randint(5, 15)):
                         particle = Spark(self.x + (self.img.get_width() / 4), self.y)
                         self.particles.append(particle)
             else:
+                self.shield_hit_sound.play()
                 self.colpoint = (obj.x, obj.y)
                 for i in range(0, random.randint(30, 50)):
                     particle = ShieldHit(self.x + (self.img.get_width() / 4), self.y)
@@ -301,7 +308,7 @@ class BossLaser(Laser):
 
 
     def img_rotate(self, img, angle):
-        self.angle += self.vel
+        self.angle += self.vel*2
         return pygame.transform.rotozoom(img, angle, 1)
 
     def draw(self, window):
@@ -690,6 +697,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
         self.height = self.ship_img.get_height()
         self.explosion_sound = explosion_sound3
         self.laser_sound = laser_boss_sound
+        self.shield_down_sound = shield_down_sound
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.add_assets()
         
@@ -752,6 +760,7 @@ class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
 
         
     def shield_down(self):
+        self.shield_down_sound.play()
         self.immune = False
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.rect = self.ship_img.get_rect(topleft=(self.x, self.y))
