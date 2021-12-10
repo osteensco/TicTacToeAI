@@ -256,8 +256,16 @@ class Laser:
             self.killshot = False
             
     def butterfly_move(self):
-        self.y += self.butterfly_dir
-        self.x -= self.butterfly_vel
+        if self.moving:
+            self.y += self.butterfly_dir
+            self.x -= self.butterfly_vel
+        elif self.killshot:
+            for i in range(0, random.randint(10, 30)):
+                particle = Explosion(self.x + (self.img.get_width() / 4), self.y)
+                spark = Spark(self.x + (self.img.get_width() / 4), self.y)
+                self.particles.append(particle)
+                self.particles.append(spark)
+            self.killshot = False
 
     def off_screen(self, height, width):#___determines if laser if off screen
         if width >= self.x > -100:

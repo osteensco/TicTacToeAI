@@ -48,6 +48,7 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.enemies = []
         self.wave_length = 3
         self.scroll_vel = 2
+        self.settings = parent.settings.apply_settings()#this should just equal the pertinent attributes
         self.enemy_power = 10
         self.enemy_vel = 1
         self.enemy_laser_vel = 4
@@ -61,10 +62,14 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.bgs = bgs
         self.prompt = None
         self.pause = False
+        
 
 
     def setpause(self):
         return not self.pause
+
+    def record(self):#create object that transfers score and other stats to SQLite DB
+        score = ScoreRecord(self.player.score)
 
     def redraw_window(self):
         for bg in self.bgs:
@@ -242,7 +247,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.player.butterfly_timer -= 1
                     butterfly_shoot(self.player)
 
-    #checks if game has been lost
+            #checks if game has been lost
             if self.player.lives <= 0:
                 self.lost = True
                 if self.lost:
@@ -251,7 +256,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.run = False
                 continue
 
-    #transitions levels and spawns enemy ships
+            #transitions levels and spawns enemy ships
             if len(self.enemies) == 0:
                 self.transition_count += 1
                 if self.transition_count == 1:
@@ -313,7 +318,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                     self.enemies.append(enemy)
 
 
-    #various enemy behaviours and movement logic
+            #various enemy behaviours and movement logic
             if self.enemies and boss:
                 if boss.destroyed:
                     for enemy in self.enemies:
@@ -417,7 +422,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                         if enemy.immune and len([s for s in enemy.assets if s.asset_type == "shield" and not s.destroyed]) == 0:
                             enemy.shield_down()
 
-    #check player buff conditions and update stuff
+            #check player buff conditions and update stuff
             if self.player.immune:
                 self.player.shield_timer -= 1
 
@@ -448,6 +453,7 @@ class Menu():
     def __init__(self, app) -> None:
         self.parent = app
         self.running = True
+        ###############change start label to just label, need to add buttons for navigation
         self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
         self.bgs = bgs
         self.run()
@@ -499,11 +505,41 @@ class Settings(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
         self.running = False
-        self.fps = ['high', 'low']
-        self.difficulty = ['high', 'medium', 'low']
-        self.cameraview = ['player in middle', 'edge of screen']
-        self.music = True
-        self.volume = 0
+        self.fps = ['high', 'low']#toggle choices
+        self.difficulty = ['high', 'medium', 'low']#toggle choices
+        self.music = True#music toggle
+        self.volume = 0#a % slider?
+
+    def run(self):
+        self.draw()
+        self.track_events()
+
+    def apply_settings(self):#whats passed to game object
+
+        #return attribute values for gamesession
+        pass
+
+    def track_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == self.parent.MUSIC_END:
+                self.parent.music.next_song()
+
+    def display(self):
+        WIN.blit(self.start_label,
+        (WIDTH/2 - self.start_label.get_width()/2,
+        HEIGHT/2 - self.start_label.get_height()/2))
+
+    def nav_main_menu(self):
+        self.apply_settings()
+        self.running = False
+
+
+class ViewHighScores(Menu):
+    def __init__(self, app) -> None:
+        super().__init__(app)
+        self.running = False
 
     def run(self):
         self.draw()
@@ -516,24 +552,34 @@ class Settings(Menu):
             if event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
 
-    def nav_main_menu(self):
-        self.running = False
-
-
-class ViewHighScores():
-    def __init__(self, app) -> None:
-        self.running = False
+    def display(self):
+        WIN.blit(self.start_label,
+        (WIDTH/2 - self.start_label.get_width()/2,
+        HEIGHT/2 - self.start_label.get_height()/2))
 
     def nav_main_menu(self):
         self.running = False
+
+class ScoreRecord():
+    def __init__(self, score) -> None:
+        self.score = score
+        #self.enemies_destroyed
+        #self.levels_completed
+        #self.time_played
+        #other statistics that might be interesting
+
+    def enter_name(self):#textbox to enter the name
+        pass
 
 class Music():
     def __init__(self) -> None:
         self.currently_playing = start_song
         self.index = -1
         self.songs = songs
+        self.volume = .5
         self.shuffle_songs()
         pygame.mixer.music.load(self.currently_playing)
+        # pygame.mixer.music.set_volume(self.volume)
         pygame.mixer.music.play()
 
     def next_song(self):

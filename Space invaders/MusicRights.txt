@@ -44,4 +44,17 @@ https://creativecommons.org/licenses/by-nd/3.0/
 
 
 
-Mixkit Sound Effects Free License
+Mixkit Sound Effects Free License:
+
+explosion1.wav
+explosion2.wav
+explosion3.wav
+laser_boss.wav
+laser_player.wav
+laser.wav
+shield_hit_sound.wav
+shield_down_sound.wav
+reflect_sound.wav
+drop_effect.wav
+
+
