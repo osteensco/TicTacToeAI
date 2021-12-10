@@ -42,16 +42,13 @@ class GameSession():#put main_loop function in here, variables are init in class
     def __init__(self, parent) -> None:
         self.parent = parent
         self.scroll_vel = scroll_vel
-        self.FPS = set_FPS
         self.run = True
         self.level = 0
         self.enemies = []
         self.wave_length = 3
         self.scroll_vel = 2
-        self.settings = parent.settings.apply_settings()#this should just equal the pertinent attributes
-        self.enemy_power = 10
+        self.FPS, self.enemy_power, self.enemy_laser_vel = parent.settings.apply_settings()
         self.enemy_vel = 1
-        self.enemy_laser_vel = 4
         self.player_vel = 10#variable to determine how many pixels per keystroke player moves
         self.player = Player(int(WIDTH/2) - int(player_space_ship.get_width()/2),
                         HEIGHT - player_space_ship.get_height() - 20, self.player_vel)#adjusted player position to be dynamic to window and ship size
@@ -501,23 +498,39 @@ class Menu():
         self.parent.highscores.running = True
 
 
-class Settings(Menu):
+class Settings(Menu):#have settings save in SQLite DB so they're the same on reopen
     def __init__(self, app) -> None:
         super().__init__(app)
         self.running = False
-        self.fps = ['high', 'low']#toggle choices
-        self.difficulty = ['high', 'medium', 'low']#toggle choices
+        self.fps_options = {'high': 90, 'low': 60}#toggle choices
+        self.difficulty_options = {
+            'high': {
+                'power': 15,
+                'laser_vel': 8
+                },
+            'medium': {
+                'power': 10,
+                'laser_vel': 4
+                },
+            'low': {
+                'power': 5,
+                'laser_vel': 2
+                }
+            }
         self.music = True#music toggle
-        self.volume = 0#a % slider?
+        self.volume = .5#a % slider?
+        self.fps = self.fps_options['high']
+        self.difficulty = self.difficulty_options['high']
 
     def run(self):
         self.draw()
         self.track_events()
 
     def apply_settings(self):#whats passed to game object
+        
+        self.parent.music
+        return self.fps, self.difficulty['power'], self.difficulty['laser_vel']
 
-        #return attribute values for gamesession
-        pass
 
     def track_events(self):
         for event in pygame.event.get():
@@ -532,7 +545,6 @@ class Settings(Menu):
         HEIGHT/2 - self.start_label.get_height()/2))
 
     def nav_main_menu(self):
-        self.apply_settings()
         self.running = False
 
 
