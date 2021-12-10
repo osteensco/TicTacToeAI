@@ -60,7 +60,11 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.transition_count = 0
         self.bgs = bgs
         self.prompt = None
+        self.pause = False
 
+
+    def setpause(self):
+        return not self.pause
 
     def redraw_window(self):
         for bg in self.bgs:
@@ -110,6 +114,12 @@ class GameSession():#put main_loop function in here, variables are init in class
                 WIDTH / 2 - transition_level_label.get_width() / 2,
                 HEIGHT / 2 - transition_level_label.get_height() / 2))
 
+        if self.pause:
+            pause_label = title_font.render("Game Paused", 1,(255, 255, 255))
+            WIN.blit(pause_label, (
+                WIDTH / 2 - pause_label.get_width() / 2,
+                HEIGHT / 2 - pause_label.get_height() / 2))
+
             
 
         for enemy in self.enemies:
@@ -128,14 +138,20 @@ class GameSession():#put main_loop function in here, variables are init in class
     def main_loop(self):
         while self.run:
             self.clock.tick(self.FPS)#this tells the game how fast to run, set by FPS variable
-            dyn_background(self.bgs, self.scroll_vel, x_adj, y_adj)
+            if not self.pause:
+                dyn_background(self.bgs, self.scroll_vel, x_adj, y_adj)
             self.redraw_window()
 
             for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        self.pause = self.setpause()
                 if event.type == pygame.QUIT:
                     quit()
                 if event.type == self.parent.MUSIC_END:
                     self.parent.music.next_song()
+            if self.pause:#pause check
+                continue
             # ________movement block, outside of event loop so that movement is less clunky
             keys = pygame.key.get_pressed()  # creates a variable to track key presses, checks based on FPS value. This block is where controls live.
             if keys[pygame.K_a]:

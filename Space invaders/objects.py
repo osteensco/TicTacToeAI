@@ -621,6 +621,9 @@ class Player(Ship):
 
 
     def healthbar(self, window):
+        if self.health > self.max_health:
+            self.health = self.max_health
+            self.lives += 1
         pygame.draw.rect(window, (255, 0, 0), (10, 100, 300, 20))
         pygame.draw.rect(window, (0, 255, 0), (10, 100, 300 * (self.health / self.max_health), 20))
 

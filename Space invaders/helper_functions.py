@@ -68,9 +68,9 @@ def dyn_background(bgs, vel, x_adj, y_adj):
 #drop effects as functions
 def health_buff(obj):
     obj.score += 200
-    if obj.health < obj.max_health or obj.lives > 9:
+    if obj.health < obj.max_health:
         obj.health = obj.max_health
-    elif obj.lives < 10:
+    else:
         obj.lives += 1
         obj.health = 50
 
@@ -141,8 +141,7 @@ def mine_mechanic(boss, laser, obj):
         boss.lasers.remove(laser)
 
 def laser_mechanic(boss, laser, obj):
-    laser.vel += .25
-    if laser.off_screen(HEIGHT, WIDTH):
+    if laser.off_screen(HEIGHT+50, WIDTH):
         boss.lasers.remove(laser)
     if laser.collision(obj) and not obj.immune:
         obj.health -= boss.power/2
