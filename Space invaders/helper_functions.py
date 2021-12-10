@@ -136,7 +136,7 @@ def mine_mechanic(boss, laser, obj):
         laser.moving = False
         laser.armed = True
     if laser.collision(obj) and not obj.immune:
-        obj.health -= boss.power/4
+        obj.health -= boss.power/6
     if laser.explosion_time > set_FPS / 3 or boss.health <= 0:
         boss.lasers.remove(laser)
 
@@ -153,9 +153,9 @@ def shotgun_mechanic(boss, laser, obj):
         boss.lasers.remove(laser)
     if laser.collision(obj):
         if not obj.immune:
-            obj.health -= laser.vel/2
+            obj.health -= laser.vel/5
         else:
-            obj.health -= laser.vel/4
+            obj.health -= laser.vel/10
         
 
 #boss asset mechanics
