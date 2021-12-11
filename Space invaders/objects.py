@@ -19,7 +19,9 @@ from init_game import (
     laser_sound,
     shield_hit_sound,
     shield_down_sound,
-    reflect_sound
+    reflect_sound,
+    start_song,
+    songs,
 
 )
 from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
@@ -38,6 +40,44 @@ class Background:
         window.blit(self.img, (self.x, self.y))
 
 
+class Button():
+    def __init__(self, x, y, img) -> None:
+        self.x = x
+        self.y = y
+        self.img = img
+        self.rect = img.get_rect(topleft=(x, y))
+
+    def click(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
+
+    def draw(self, window):
+        window.blit(self.img, (self.x, self.y))
+
+
+class Music():
+    def __init__(self) -> None:
+        self.currently_playing = start_song
+        self.index = -1
+        self.songs = songs
+        self.volume = .5
+        self.shuffle_songs()
+        pygame.mixer.music.load(self.currently_playing)
+        # pygame.mixer.music.set_volume(self.volume)
+        pygame.mixer.music.play()
+
+    def next_song(self):
+        self.index += 1
+        if self.index >= len(self.songs):
+            self.index = 0
+        self.currently_playing = self.songs[self.index]
+        pygame.mixer.music.load(self.currently_playing)
+        pygame.mixer.music.play()
+
+    def shuffle_songs(self):
+        random.shuffle(self.songs)
+        self.songs.append(start_song)
+
+
 class Particle:#circles for now, can break out into child classes for other images/shapes
     def __init__(self, x, y):
         self.x = x
@@ -51,7 +91,6 @@ class Particle:#circles for now, can break out into child classes for other imag
     def draw(self, window):
         if self.burn_time >= 0:
             pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), int(self.burn_time))
-
 
 
 class ShieldHit(Particle):
@@ -133,7 +172,6 @@ class Spark(Particle):
             pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), int(self.burn_time/2))
 
 
-
 class Explosion(Particle):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -157,7 +195,6 @@ class Explosion(Particle):
         if self.burn_time >= 0:
             self.glow_effect(window)
             pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), int(self.burn_time/2))
-
 
 
 class Drop:
@@ -191,9 +228,6 @@ class Drop:
         else:
             return False
 
-
-#______________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________
 
 class Laser:
     def __init__(self, shooter, x, y, vel, img, butterfly=False):
@@ -300,8 +334,6 @@ class Laser:
                 self.vel = -self.vel*2
             return True
 
-
-        
         
 class BossLaser(Laser):
     def __init__(self, shooter, x, y, vel, img):
@@ -370,9 +402,6 @@ class BossLaser(Laser):
             (self.rect.centerx + random.uniform(-self.img.get_width(), 0),
             self.rect.centery + random.uniform(-self.img.get_height(), 0)))
 
-
-#______________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________
 
 class Ship:
     COOLDOWN = 25
@@ -575,11 +604,6 @@ class Ship:
             return self.height
 
 
-
-
-#______________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________
-
 class Player(Ship):
     def __init__(self, x, y, vel, health=100):
         super().__init__(x, y, vel, health)
@@ -671,10 +695,6 @@ class Enemy(Ship):
                 if not obj.immune:
                     obj.health -= self.power/2
         
-
-
-#______________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________
 
 class Boss(Ship):#have separate lists for boss, boss asset, boss weapon.
                  # randomize these matches. Keep in dict for key/values like color map?

@@ -37,7 +37,10 @@ def load_sound(folder, sound_name, vol=.5):
     sound.set_volume(vol)
     return sound
 
-#background
+
+#Load images
+
+#backgrounds
 background = pygame.transform.scale(load_image("assets", "background-black.png"), (WIDTH, HEIGHT))
 bg1_img = background
 bg2_img = pygame.transform.rotate(background, 180)
@@ -48,8 +51,12 @@ x_adj = background.get_width()
 y_adj = background.get_height()
 quadrant = int(WIDTH/4)
 
+#buttons
+button_play = load_image("assets", "button_play.png")
+button_settings = load_image("assets", "button_settings.png")
+button_highscores = load_image("assets", "button_highscores.png")
+button_menu = load_image("assets", "button_menu.png")
 
-#Load images
 #drops
 health_drop = load_image("assets", "health_drop.png")
 fire_rate_drop = load_image("assets", "fire_rate_drop.png")

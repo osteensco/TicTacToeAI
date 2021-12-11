@@ -19,13 +19,16 @@ from init_game import (
     set_FPS,
     scroll_vel,
     enparmove,
-    start_song,
-    songs,
+    button_play,
+    button_settings,
+    button_highscores,
+    button_menu,
+
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
 from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
-from objects import Background, Player, Boss, Enemy, Ship, Explosion, Spark
+from objects import Background, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
 
@@ -38,7 +41,7 @@ bg4 = Background(x_adj, y_adj, bg4_img)
 bgs = [bg1, bg2, bg3, bg4]
 
 
-class GameSession():#put main_loop function in here, variables are init in class, variables in settings should be passed to here when GameSession object is created
+class GameSession():
     def __init__(self, parent) -> None:
         self.parent = parent
         self.scroll_vel = scroll_vel
@@ -47,11 +50,11 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.enemies = []
         self.wave_length = 3
         self.scroll_vel = 2
-        self.FPS, self.enemy_power, self.enemy_laser_vel = parent.settings.apply_settings()
+        self.FPS, self.enemy_power, self.enemy_laser_vel, self.controls = parent.settings.apply_settings()
         self.enemy_vel = 1
         self.player_vel = 10#variable to determine how many pixels per keystroke player moves
         self.player = Player(int(WIDTH/2) - int(player_space_ship.get_width()/2),
-                        HEIGHT - player_space_ship.get_height() - 20, self.player_vel)#adjusted player position to be dynamic to window and ship size
+                        HEIGHT - player_space_ship.get_height() - 20, self.player_vel)
         self.clock = pygame.time.Clock()
         self.lost = False
         self.lost_count = 0
@@ -60,8 +63,6 @@ class GameSession():#put main_loop function in here, variables are init in class
         self.prompt = None
         self.pause = False
         
-
-
     def setpause(self):
         return not self.pause
 
@@ -145,7 +146,7 @@ class GameSession():#put main_loop function in here, variables are init in class
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_p:
+                    if event.key == self.controls['pause']:
                         self.pause = self.setpause()
                 if event.type == pygame.QUIT:
                     quit()
@@ -155,7 +156,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                 continue
             # ________movement block, outside of event loop so that movement is less clunky
             keys = pygame.key.get_pressed()  # creates a variable to track key presses, checks based on FPS value. This block is where controls live.
-            if keys[pygame.K_a]:
+            if keys[self.controls['left']]:
                 if self.player.x > quadrant:  # left movement
                     self.player.x -= self.player_vel
                 else:
@@ -193,7 +194,7 @@ class GameSession():#put main_loop function in here, variables are init in class
                                 particle.x += self.player_vel
                             for drp in asset.drops:
                                 drp.x += self.player_vel
-            if keys[pygame.K_d]:
+            if keys[self.controls['right']]:
                 if self.player.x + self.player.get_width() < WIDTH - quadrant:  # right movement
                     self.player.x += self.player_vel
                 else:
@@ -231,14 +232,14 @@ class GameSession():#put main_loop function in here, variables are init in class
                                 particle.x -= self.player_vel
                             for drp in asset.drops:
                                 drp.x -= self.player_vel
-            if keys[pygame.K_w] and self.player.y > -1:  # up movement
+            if keys[self.controls['up']] and self.player.y > -1:  # up movement
                 if self.player.y >= self.player_vel:
                     self.player.y -= self.player_vel
                 else:
                     self.player.y -= self.player.y
-            if keys[pygame.K_s] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement
+            if keys[self.controls['down']] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement
                 self.player.y += self.player_vel
-            if keys[pygame.K_SPACE]:
+            if keys[self.controls['shoot']]:#shoot
                 self.player.shoot()
                 if self.player.butterfly_gun:
                     self.player.butterfly_timer -= 1
@@ -450,8 +451,11 @@ class Menu():
     def __init__(self, app) -> None:
         self.parent = app
         self.running = True
-        ###############change start label to just label, need to add buttons for navigation
-        self.start_label = title_font.render("Press ENTER to begin", 1, (255,255,255))
+        self.label = title_font.render("SPACE DEFENSE!", 1, (255,255,255))
+        self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5) - 10, button_play)
+        self.settings_button = Button(WIDTH/2 - button_settings.get_width()/2, (HEIGHT/2) - (button_play.get_height()/2) , button_settings)
+        self.highscores_button = Button(WIDTH/2 - button_highscores.get_width()/2, (HEIGHT/2) + (button_play.get_height()*1.5) + 10, button_highscores)
+        self.buttons = [self.play_button, self.settings_button, self.highscores_button]
         self.bgs = bgs
         self.run()
 
@@ -472,9 +476,9 @@ class Menu():
             bg.draw(WIN)
 
     def display(self):
-        WIN.blit(self.start_label,
-        (WIDTH/2 - self.start_label.get_width()/2,
-        HEIGHT/2 - self.start_label.get_height()/2))
+        WIN.blit(self.label, (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2))
+        for button in self.buttons:
+            button.draw(WIN)
         
     def draw(self):
         self.background()
@@ -485,14 +489,19 @@ class Menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    self.parent.newgame()
             if event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse = pygame.mouse.get_pos()
+                if self.play_button.click(mouse):
+                    self.parent.newgame()
+                if self.settings_button.click(mouse):
+                    self.nav_settings()
+                if self.highscores_button.click(mouse):
+                    self.nav_view_scores()
 
     def nav_settings(self):
-        self.parent.seetings.running = True
+        self.parent.settings.running = True
 
     def nav_view_scores(self):
         self.parent.highscores.running = True
@@ -502,35 +511,42 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
     def __init__(self, app) -> None:
         super().__init__(app)
         self.running = False
+        self.label = title_font.render("SETTINGS", 1, (255,255,255))
         self.fps_options = {'high': 90, 'low': 60}#toggle choices
         self.difficulty_options = {
             'high': {
                 'power': 15,
                 'laser_vel': 8
-                },
+            },
             'medium': {
                 'power': 10,
                 'laser_vel': 4
-                },
+            },
             'low': {
                 'power': 5,
                 'laser_vel': 2
-                }
             }
+        }
+        self.controls = {
+            'up': pygame.K_w,
+            'left': pygame.K_a,
+            'right': pygame.K_d,
+            'down': pygame.K_s,
+            'shoot': pygame.K_SPACE,
+            'pause': pygame.K_p,
+
+        }
         self.music = True#music toggle
         self.volume = .5#a % slider?
         self.fps = self.fps_options['high']
-        self.difficulty = self.difficulty_options['high']
+        self.difficulty = self.difficulty_options['medium']
 
     def run(self):
         self.draw()
         self.track_events()
 
-    def apply_settings(self):#whats passed to game object
-        
-        self.parent.music
-        return self.fps, self.difficulty['power'], self.difficulty['laser_vel']
-
+    def apply_settings(self):#passes settings to game object
+        return self.fps, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
 
     def track_events(self):
         for event in pygame.event.get():
@@ -540,9 +556,9 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
                 self.parent.music.next_song()
 
     def display(self):
-        WIN.blit(self.start_label,
-        (WIDTH/2 - self.start_label.get_width()/2,
-        HEIGHT/2 - self.start_label.get_height()/2))
+        WIN.blit(self.label,
+        (WIDTH/2 - self.label.get_width()/2,
+        HEIGHT/2 - self.label.get_height()/2))
 
     def nav_main_menu(self):
         self.running = False
@@ -552,6 +568,7 @@ class ViewHighScores(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
         self.running = False
+        self.label = title_font.render("HIGH SCORES", 1, (255,255,255))
 
     def run(self):
         self.draw()
@@ -565,12 +582,13 @@ class ViewHighScores(Menu):
                 self.parent.music.next_song()
 
     def display(self):
-        WIN.blit(self.start_label,
-        (WIDTH/2 - self.start_label.get_width()/2,
-        HEIGHT/2 - self.start_label.get_height()/2))
+        WIN.blit(self.label,
+        (WIDTH/2 - self.label.get_width()/2,
+        HEIGHT/2 - self.label.get_height()/2))
 
     def nav_main_menu(self):
         self.running = False
+
 
 class ScoreRecord():
     def __init__(self, score) -> None:
@@ -582,29 +600,6 @@ class ScoreRecord():
 
     def enter_name(self):#textbox to enter the name
         pass
-
-class Music():
-    def __init__(self) -> None:
-        self.currently_playing = start_song
-        self.index = -1
-        self.songs = songs
-        self.volume = .5
-        self.shuffle_songs()
-        pygame.mixer.music.load(self.currently_playing)
-        # pygame.mixer.music.set_volume(self.volume)
-        pygame.mixer.music.play()
-
-    def next_song(self):
-        self.index += 1
-        if self.index >= len(self.songs):
-            self.index = 0
-        self.currently_playing = self.songs[self.index]
-        pygame.mixer.music.load(self.currently_playing)
-        pygame.mixer.music.play()
-
-    def shuffle_songs(self):
-        random.shuffle(self.songs)
-        self.songs.append(start_song)
 
 
 class App():
