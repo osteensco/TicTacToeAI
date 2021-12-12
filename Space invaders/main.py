@@ -74,15 +74,15 @@ class GameSession():
             bg.draw(WIN)
         if self.player.lives > 1:
             lives_label = main_font.render(f"Shield Layers: {self.player.lives}", 1, (255, 255, 255))
-            player_health_label = main_font.render(f"Shield Strength: {self.player.health}", 1, (0, 225, 0))
+            player_health_label = main_font.render(f"Shield Strength: {round(self.player.health)}", 1, (0, 225, 0))
         else:
             lives_label = main_font.render(f"Shield Layers: {self.player.lives}", 1, (255, 0, 0))  # red for 1 life left
-            player_health_label = main_font.render(f"Shield Strength: {self.player.health}", 1, (225, 0, 0))
+            player_health_label = main_font.render(f"Shield Strength: {round(self.player.health)}", 1, (225, 0, 0))
 
 
         level_label = main_font.render(f"Level: {self.level}", 1, (255, 255, 255))  # level label top right corner
         
-        score_label = main_font.render(f"Score: {self.player.score}", 1, (235, 0, 255))
+        score_label = main_font.render(f"Score: {round(self.player.score)}", 1, (235, 0, 255))
 
         enemy_count_label = main_font.render(f"Enemies: {len(self.enemies)}", 1, (255, 255, 255))
 
@@ -445,30 +445,25 @@ class GameSession():
 
 
 #______________________________________________MENUS____________________________________________________________________________________
-
-
 class Menu():
     def __init__(self, app) -> None:
         self.parent = app
-        self.running = True
+        self.running = False
         self.label = title_font.render("SPACE DEFENSE!", 1, (255,255,255))
-        self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5) - 10, button_play)
-        self.settings_button = Button(WIDTH/2 - button_settings.get_width()/2, (HEIGHT/2) - (button_play.get_height()/2) , button_settings)
-        self.highscores_button = Button(WIDTH/2 - button_highscores.get_width()/2, (HEIGHT/2) + (button_play.get_height()*1.5) + 10, button_highscores)
+        self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5), button_play)
+        self.settings_button = Button(WIDTH/2 - button_settings.get_width()/2, (HEIGHT/2) - (button_settings.get_height()/2) , button_settings)
+        self.highscores_button = Button(WIDTH/2 - button_highscores.get_width()/2, (HEIGHT/2) + (button_highscores.get_height()/2), button_highscores)
+        self.menu_button = Button(200, HEIGHT-200, button_menu)
         self.buttons = [self.play_button, self.settings_button, self.highscores_button]
         self.bgs = bgs
-        self.run()
 
     def run(self):
+        self.running = True
         while self.running:
-            if not self.parent.settings.running or not self.parent.highscores.running:
-                self.draw()
-                self.track_events()
-            elif self.parent.settings.running:
-                self.parent.settings.run()
-            elif self.parent.highscores.running:
-                self.parent.highscores.run()
-        quit()
+            self.draw()
+            self.track_events()
+
+        
     
     def background(self):
         dyn_background(self.bgs, scroll_vel/5, x_adj, y_adj)
@@ -489,6 +484,7 @@ class Menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+                quit()
             if event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -501,16 +497,19 @@ class Menu():
                     self.nav_view_scores()
 
     def nav_settings(self):
-        self.parent.settings.running = True
+        self.running = False
+        self.parent.settings.run()
+        
 
     def nav_view_scores(self):
-        self.parent.highscores.running = True
+        self.running = False
+        self.parent.highscores.run()
+        
 
 
 class Settings(Menu):#have settings save in SQLite DB so they're the same on reopen
     def __init__(self, app) -> None:
         super().__init__(app)
-        self.running = False
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
         self.fps_options = {'high': 90, 'low': 60}#toggle choices
         self.difficulty_options = {
@@ -540,10 +539,11 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.volume = .5#a % slider?
         self.fps = self.fps_options['high']
         self.difficulty = self.difficulty_options['medium']
+        self.buttons = [self.menu_button]
 
-    def run(self):
-        self.draw()
-        self.track_events()
+    # def run(self):
+    #     self.draw()
+    #     self.track_events()
 
     def apply_settings(self):#passes settings to game object
         return self.fps, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
@@ -552,42 +552,41 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+                quit()
             if event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
-
-    def display(self):
-        WIN.blit(self.label,
-        (WIDTH/2 - self.label.get_width()/2,
-        HEIGHT/2 - self.label.get_height()/2))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse = pygame.mouse.get_pos()
+                if self.menu_button.click(mouse):
+                    self.nav_main_menu()
 
     def nav_main_menu(self):
         self.running = False
+        self.parent.main_menu.run()
+        
 
 
 class ViewHighScores(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
-        self.running = False
         self.label = title_font.render("HIGH SCORES", 1, (255,255,255))
-
-    def run(self):
-        self.draw()
-        self.track_events()
+        self.buttons = [self.menu_button]
 
     def track_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+                quit()
             if event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
-
-    def display(self):
-        WIN.blit(self.label,
-        (WIDTH/2 - self.label.get_width()/2,
-        HEIGHT/2 - self.label.get_height()/2))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse = pygame.mouse.get_pos()
+                if self.menu_button.click(mouse):
+                    self.nav_main_menu()
 
     def nav_main_menu(self):
         self.running = False
+        self.parent.main_menu.run()
 
 
 class ScoreRecord():
@@ -607,10 +606,11 @@ class App():
         self.music = Music()
         self.MUSIC_END = pygame.USEREVENT+1
         pygame.mixer.music.set_endevent(self.MUSIC_END)
+        self.main_menu = Menu(self)#starts game at main menu when game is opened
         self.settings = Settings(self)
         self.highscores = ViewHighScores(self)
-        self.main_menu = Menu(self)#starts game at main menu when game is opened
         self.game = None
+        self.main_menu.run()
 
     def newgame(self):
         self.game = GameSession(self)
