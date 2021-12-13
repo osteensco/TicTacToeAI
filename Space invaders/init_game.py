@@ -12,7 +12,7 @@ pygame.display.set_caption("Space Defense")
 main_font = pygame.font.SysFont("comicsans", 50)
 lost_font = pygame.font.SysFont("comicsans", 100)
 #menu and in game messaging font
-title_font = pygame.font.SysFont("comicsans", 60)
+title_font = pygame.font.SysFont("comicsans", 100)
 
 
 # variables

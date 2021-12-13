@@ -27,7 +27,7 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS
 from objects import Background, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
@@ -146,7 +146,7 @@ class GameSession():
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key == self.controls['pause']:
+                    if event.key == self.controls['pause'][1]:
                         self.pause = self.setpause()
                 if event.type == pygame.QUIT:
                     quit()
@@ -156,7 +156,7 @@ class GameSession():
                 continue
             # ________movement block, outside of event loop so that movement is less clunky
             keys = pygame.key.get_pressed()  # creates a variable to track key presses, checks based on FPS value. This block is where controls live.
-            if keys[self.controls['left']]:
+            if keys[self.controls['left'][1]]:
                 if self.player.x > quadrant:  # left movement
                     self.player.x -= self.player_vel
                 else:
@@ -194,7 +194,7 @@ class GameSession():
                                 particle.x += self.player_vel
                             for drp in asset.drops:
                                 drp.x += self.player_vel
-            if keys[self.controls['right']]:
+            if keys[self.controls['right'][1]]:
                 if self.player.x + self.player.get_width() < WIDTH - quadrant:  # right movement
                     self.player.x += self.player_vel
                 else:
@@ -232,14 +232,14 @@ class GameSession():
                                 particle.x -= self.player_vel
                             for drp in asset.drops:
                                 drp.x -= self.player_vel
-            if keys[self.controls['up']] and self.player.y > -1:  # up movement
+            if keys[self.controls['up'][1]] and self.player.y > -1:  # up movement
                 if self.player.y >= self.player_vel:
                     self.player.y -= self.player_vel
                 else:
                     self.player.y -= self.player.y
-            if keys[self.controls['down']] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement
+            if keys[self.controls['down'][1]] and self.player.y + self.player.get_height() + 1 < HEIGHT:  # down movement
                 self.player.y += self.player_vel
-            if keys[self.controls['shoot']]:#shoot
+            if keys[self.controls['shoot'][1]]:#shoot
                 self.player.shoot()
                 if self.player.butterfly_gun:
                     self.player.butterfly_timer -= 1
@@ -511,39 +511,29 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
     def __init__(self, app) -> None:
         super().__init__(app)
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
+        self.general_label = main_font.render("General", 1, (255,255,255))
+        self.controls_label = main_font.render("Controls", 1, (255,255,255))
+        self.set_fps_label = main_font.render("Set FPS", 1, (255,255,255))
+        self.set_difficulty_label = main_font.render("Set Difficulty", 1, (255,255,255))
+        self.music_label = main_font.render("Music", 1, (255,255,255))
+        self.soundfx_label = main_font.render("Sound FX Volume", 1, (255,255,255))
         self.fps_options = {'high': 90, 'low': 60}#toggle choices
-        self.difficulty_options = {
-            'high': {
-                'power': 15,
-                'laser_vel': 8
-            },
-            'medium': {
-                'power': 10,
-                'laser_vel': 4
-            },
-            'low': {
-                'power': 5,
-                'laser_vel': 2
-            }
-        }
-        self.controls = {
-            'up': pygame.K_w,
-            'left': pygame.K_a,
-            'right': pygame.K_d,
-            'down': pygame.K_s,
-            'shoot': pygame.K_SPACE,
-            'pause': pygame.K_p,
-
-        }
+        self.difficulty_options = DIFFICULTY_SETTINGS
+        self.controls = CONTROL_SETTINGS
         self.music = True#music toggle
         self.volume = .5#a % slider?
-        self.fps = self.fps_options['high']
-        self.difficulty = self.difficulty_options['medium']
+        self.fps_select = 'high'
+        self.difficulty_select = 'medium'
         self.buttons = [self.menu_button]
+        self.update_settings()
 
-    # def run(self):
-    #     self.draw()
-    #     self.track_events()
+    def default_settings(self):
+        self.fps_select = 'high'
+        self.difficulty_select = 'medium'
+
+    def update_settings(self):
+        self.fps = self.fps_options[self.fps_select]
+        self.difficulty = self.difficulty_options[self.difficulty_select]
 
     def apply_settings(self):#passes settings to game object
         return self.fps, self.difficulty['power'], self.difficulty['laser_vel'], self.controls

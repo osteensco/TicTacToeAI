@@ -1,3 +1,4 @@
+import pygame
 from init_game import (
     red_space_ship,
     red_laser,
@@ -24,6 +25,7 @@ from init_game import (
     boss_2_flect,
     boss_2_drone,
     boss_red,
+    main_font
     
 )
 from helper_functions import (
@@ -89,4 +91,28 @@ BOSS_COLOR_MAP = {
     "green": boss_green,
     "blue": boss_blue,
     "red": boss_red,
+}
+
+DIFFICULTY_SETTINGS = {
+    'high': {
+        'power': 15,
+        'laser_vel': 8
+    },
+    'medium': {
+        'power': 10,
+        'laser_vel': 4
+    },
+    'low': {
+        'power': 5,
+        'laser_vel': 2
+    }
+}
+
+CONTROL_SETTINGS = {
+    'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
+    'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
+    'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
+    'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
+    'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
+    'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
 }
