@@ -116,3 +116,8 @@ CONTROL_SETTINGS = {
     'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
     'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
 }
+
+FPS_SETTINGS = {
+    'high': 90,
+    'low': 60
+}

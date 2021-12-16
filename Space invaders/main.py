@@ -27,7 +27,7 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS, FPS_SETTINGS
 from objects import Background, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
@@ -463,8 +463,6 @@ class Menu():
             self.draw()
             self.track_events()
 
-        
-    
     def background(self):
         dyn_background(self.bgs, scroll_vel/5, x_adj, y_adj)
         for bg in self.bgs:
@@ -514,22 +512,46 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.general_label = main_font.render("General", 1, (255,255,255))
         self.controls_label = main_font.render("Controls", 1, (255,255,255))
         self.set_fps_label = main_font.render("Set FPS", 1, (255,255,255))
+        # self.fps_option_90
         self.set_difficulty_label = main_font.render("Set Difficulty", 1, (255,255,255))
         self.music_label = main_font.render("Music", 1, (255,255,255))
         self.soundfx_label = main_font.render("Sound FX Volume", 1, (255,255,255))
-        self.fps_options = {'high': 90, 'low': 60}#toggle choices
+        self.fps_options = FPS_SETTINGS
         self.difficulty_options = DIFFICULTY_SETTINGS
         self.controls = CONTROL_SETTINGS
         self.music = True#music toggle
         self.volume = .5#a % slider?
-        self.fps_select = 'high'
-        self.difficulty_select = 'medium'
+        self.fps = None
+        self.fps_select = None
+        self.difficulty = None
+        self.difficulty_select = None
         self.buttons = [self.menu_button]
+        self.default_settings()
         self.update_settings()
+        self.all = [self.difficulty, self.fps, self.music, self.volume, self.controls]
+
+    def choose_option(self, choice):
+        h = choice.get_width()
+        w = choice.get_height()
+
+
+    def display(self):
+        super().display()
+        for setting in self.all:
+            self.choose_option(setting)#make a Setting class for each setting in self.all for easier handling
+            #attributes will include label, selected box, with methods and other stuff
 
     def default_settings(self):
         self.fps_select = 'high'
         self.difficulty_select = 'medium'
+        self.controls = {
+            'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
+            'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
+            'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
+            'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
+            'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
+            'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
+        }
 
     def update_settings(self):
         self.fps = self.fps_options[self.fps_select]

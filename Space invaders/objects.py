@@ -22,6 +22,7 @@ from init_game import (
     reflect_sound,
     start_song,
     songs,
+    main_font
 
 )
 from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
@@ -52,6 +53,19 @@ class Button():
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
+
+
+class Setting():
+    def __init__(self, x, y, labeltxt, options, default) -> None:
+        self.x = x
+        self.y = y
+        self.label = main_font.render(labeltxt, 1, (255,255,255))
+        self.options = options
+        self.selected = default
+        self.get_width = self.label.get_width
+        self.get_height = self.label.get_height
+
+
 
 
 class Music():
