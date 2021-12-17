@@ -528,11 +528,10 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.controls = CONTROL_SETTINGS
         #controlsetting class
         #keep dict?
+        
         self.apply_default = Button(600, HEIGHT-200, button_menu)
         self.buttons = [self.menu_button]
-        self.default_settings()
-        self.update_settings()
-        self.all = [self.difficulty, self.fps, self.music, self.volume, self.controls]
+        self.all = [self.difficulty, self.fps, self.music]
 
     def display(self):
         super().display()
@@ -551,10 +550,6 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
             'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
             'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
         }
-
-    def update_settings(self):
-        self.fps = self.fps_options[self.fps_select]
-        self.difficulty = self.difficulty_options[self.difficulty_select]
 
     def apply_settings(self):#passes settings to game object
         return self.fps.selected, self.difficulty['power'], self.difficulty['laser_vel'], self.controls

@@ -65,28 +65,30 @@ class Setting():
         self.y = y
         self.label = main_font.render(labeltxt, 1, (255,255,255))
         self.options = options
-        self.selected = self.options[default]
+        self.selected = [default, self.options[default]]
         self.buttons = {}
         self.create_buttons()
         self.select(default)
 
     def select(self, choice):
-        self.button[self.selected].selected = False
-        self.selected = self.options[choice]
-        self.button[choice].selected = True
+        self.buttons[self.selected[0]].selected = False
+        self.selected = [choice, self.options[choice]]
+        self.buttons[choice].selected = True
 
     def create_buttons(self):
-        for i, option in enumerate(self.options):
+        count = 0
+        for option, v in self.options.items():
+            count += 1
             txt = main_font.render(option, 1, (255,255,255))
-            self.buttons[option] = Button(self.spacing(i), self.y, txt)
+            self.buttons[option] = Button(self.spacing(count), self.y, txt)
 
     def draw(self):
         WIN.blit(self.label, (self.x, self.y))
         for button in self.buttons:
-            button.draw(WIN)
+            self.buttons[button].draw(WIN)
 
     def spacing(self, n):
-        return self.x + self.get_width() + 20*(n+1)
+        return self.x + self.get_width() + 20*(n)
 
     def get_width(self):
         return self.label.get_width()
