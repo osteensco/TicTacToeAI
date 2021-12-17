@@ -27,8 +27,8 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS, FPS_SETTINGS
-from objects import Background, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS, FPS_SETTINGS, MUSIC_SETTINGS
+from objects import Background, Setting, ControlSetting, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
 
@@ -511,39 +511,38 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
         self.general_label = main_font.render("General", 1, (255,255,255))
         self.controls_label = main_font.render("Controls", 1, (255,255,255))
-        self.set_fps_label = main_font.render("Set FPS", 1, (255,255,255))
-        # self.fps_option_90
-        self.set_difficulty_label = main_font.render("Set Difficulty", 1, (255,255,255))
-        self.music_label = main_font.render("Music", 1, (255,255,255))
-        self.soundfx_label = main_font.render("Sound FX Volume", 1, (255,255,255))
+        #label positions in methods that return x, y values
+        #align setting labels accordingly based on caategory
+            #add a spacing method that adds some value to y similar to what's in Setting class
+        #follow pattern from self.fps#########################
+
         self.fps_options = FPS_SETTINGS
+        self.fps = Setting(0,0, "FPS: ", self.fps_options, 'high')
+
         self.difficulty_options = DIFFICULTY_SETTINGS
+        self.difficulty = Setting(0,0, "Difficulty: ", self.difficulty_options, 'medium')
+       
+        self.music_options = MUSIC_SETTINGS
+        self.music = Setting(0,0, "Music: ", self.music_options, 'On')
+        
         self.controls = CONTROL_SETTINGS
-        self.music = True#music toggle
-        self.volume = .5#a % slider?
-        self.fps = None
-        self.fps_select = None
-        self.difficulty = None
-        self.difficulty_select = None
+        #controlsetting class
+        #keep dict?
+        self.apply_default = Button(600, HEIGHT-200, button_menu)
         self.buttons = [self.menu_button]
         self.default_settings()
         self.update_settings()
         self.all = [self.difficulty, self.fps, self.music, self.volume, self.controls]
 
-    def choose_option(self, choice):
-        h = choice.get_width()
-        w = choice.get_height()
-
-
     def display(self):
         super().display()
         for setting in self.all:
-            self.choose_option(setting)#make a Setting class for each setting in self.all for easier handling
-            #attributes will include label, selected box, with methods and other stuff
+            setting.draw()
 
     def default_settings(self):
-        self.fps_select = 'high'
-        self.difficulty_select = 'medium'
+        self.fps.select('high')
+        self.difficulty.select('medium')
+        self.music.select('On')
         self.controls = {
             'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
             'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
@@ -558,7 +557,7 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.difficulty = self.difficulty_options[self.difficulty_select]
 
     def apply_settings(self):#passes settings to game object
-        return self.fps, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
+        return self.fps.selected, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
 
     def track_events(self):
         for event in pygame.event.get():
@@ -571,6 +570,8 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
                 mouse = pygame.mouse.get_pos()
                 if self.menu_button.click(mouse):
                     self.nav_main_menu()
+                if self.apply_default.click(mouse):
+                    self.default_settings()
 
     def nav_main_menu(self):
         self.running = False

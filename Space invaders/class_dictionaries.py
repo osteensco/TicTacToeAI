@@ -121,3 +121,8 @@ FPS_SETTINGS = {
     'high': 90,
     'low': 60
 }
+
+MUSIC_SETTINGS = {
+    'On': True,
+    'Off': False
+}

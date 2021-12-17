@@ -2,6 +2,7 @@ import pygame
 import random
 from pygame.constants import BLEND_RGB_ADD
 from init_game import (
+    WIN,
     blank,
     explosions,
     player_space_ship,
@@ -47,12 +48,15 @@ class Button():
         self.y = y
         self.img = img
         self.rect = img.get_rect(topleft=(x, y))
+        self.selected = False
 
     def click(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
 
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
+        if self.selected:
+            pygame.draw.rect(window, (255,255,255), self.rect, 2)
 
 
 class Setting():
@@ -61,11 +65,39 @@ class Setting():
         self.y = y
         self.label = main_font.render(labeltxt, 1, (255,255,255))
         self.options = options
-        self.selected = default
-        self.get_width = self.label.get_width
-        self.get_height = self.label.get_height
+        self.selected = self.options[default]
+        self.buttons = {}
+        self.create_buttons()
+        self.select(default)
+
+    def select(self, choice):
+        self.button[self.selected].selected = False
+        self.selected = self.options[choice]
+        self.button[choice].selected = True
+
+    def create_buttons(self):
+        for i, option in enumerate(self.options):
+            txt = main_font.render(option, 1, (255,255,255))
+            self.buttons[option] = Button(self.spacing(i), self.y, txt)
+
+    def draw(self):
+        WIN.blit(self.label, (self.x, self.y))
+        for button in self.buttons:
+            button.draw(WIN)
+
+    def spacing(self, n):
+        return self.x + self.get_width() + 20*(n+1)
+
+    def get_width(self):
+        return self.label.get_width()
+
+    def get_height(self):
+        return self.label.get_height
 
 
+class ControlSetting():
+    def __init__(self) -> None:
+        pass
 
 
 class Music():
