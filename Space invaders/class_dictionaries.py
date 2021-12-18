@@ -98,7 +98,7 @@ DIFFICULTY_SETTINGS = {
         'power': 15,
         'laser_vel': 8
     },
-    'medium': {
+    'med': {
         'power': 10,
         'laser_vel': 4
     },

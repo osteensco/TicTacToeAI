@@ -88,7 +88,7 @@ class Setting():
             self.buttons[button].draw(WIN)
 
     def spacing(self, n):
-        return self.x + self.get_width() + 20*(n)
+        return self.x + (100*(n+1))
 
     def get_width(self):
         return self.label.get_width()

@@ -450,11 +450,13 @@ class Menu():
         self.parent = app
         self.running = False
         self.label = title_font.render("SPACE DEFENSE!", 1, (255,255,255))
+        self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5), button_play)
         self.settings_button = Button(WIDTH/2 - button_settings.get_width()/2, (HEIGHT/2) - (button_settings.get_height()/2) , button_settings)
         self.highscores_button = Button(WIDTH/2 - button_highscores.get_width()/2, (HEIGHT/2) + (button_highscores.get_height()/2), button_highscores)
-        self.menu_button = Button(200, HEIGHT-200, button_menu)
+        self.menu_button = Button(15, HEIGHT-115, button_menu)
         self.buttons = [self.play_button, self.settings_button, self.highscores_button]
+        self.labels = [(self.label, self.labelxy)]
         self.bgs = bgs
 
     def run(self):
@@ -469,7 +471,8 @@ class Menu():
             bg.draw(WIN)
 
     def display(self):
-        WIN.blit(self.label, (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2))
+        for label in self.labels:
+            WIN.blit(label[0], label[1])
         for button in self.buttons:
             button.draw(WIN)
         
@@ -497,7 +500,6 @@ class Menu():
     def nav_settings(self):
         self.running = False
         self.parent.settings.run()
-        
 
     def nav_view_scores(self):
         self.running = False
@@ -509,29 +511,36 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
     def __init__(self, app) -> None:
         super().__init__(app)
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
+        self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.general_label = main_font.render("General", 1, (255,255,255))
+        self.general_labelxy = (WIDTH/4 - self.general_label.get_width()/2, self.labelxy[1]+self.label.get_height()+10)
+        self.generalposx = self.general_labelxy[0] - self.general_label.get_width()/2
         self.controls_label = main_font.render("Controls", 1, (255,255,255))
-        #label positions in methods that return x, y values
-        #align setting labels accordingly based on caategory
-            #add a spacing method that adds some value to y similar to what's in Setting class
-        #follow pattern from self.fps#########################
+        self.controls_labelxy = (WIDTH - WIDTH/4 - self.controls_label.get_width()/2, self.labelxy[1]+self.label.get_height()+10)
+        self.controlsposx = self.controls_labelxy[0] - self.controls_label.get_width()/2
+        
 
         self.fps_options = FPS_SETTINGS
-        self.fps = Setting(0,0, "FPS: ", self.fps_options, 'high')
+        self.fps = Setting(self.generalposx, self.yspacing(1), "FPS: ", self.fps_options, 'high')
 
         self.difficulty_options = DIFFICULTY_SETTINGS
-        self.difficulty = Setting(0,0, "Difficulty: ", self.difficulty_options, 'medium')
+        self.difficulty = Setting(self.generalposx, self.yspacing(2), "Difficulty: ", self.difficulty_options, 'med')
        
         self.music_options = MUSIC_SETTINGS
-        self.music = Setting(0,0, "Music: ", self.music_options, 'On')
+        self.music = Setting(self.generalposx, self.yspacing(3), "Music: ", self.music_options, 'On')
         
         self.controls = CONTROL_SETTINGS
         #controlsetting class
         #keep dict?
         
-        self.apply_default = Button(600, HEIGHT-200, button_menu)
-        self.buttons = [self.menu_button]
+        self.apply_default = Button(175, HEIGHT-115, button_menu)
+        self.buttons = [self.menu_button, self.apply_default]
+        self.labels = [(self.label, self.labelxy), (self.general_label, self.general_labelxy), (self.controls_label, self.controls_labelxy)]
         self.all = [self.difficulty, self.fps, self.music]
+
+    def yspacing(self, order):
+        h = self.general_label.get_height()
+        return (self.general_labelxy[1] + h) + ((h+50) * order)
 
     def display(self):
         super().display()
@@ -540,7 +549,7 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
 
     def default_settings(self):
         self.fps.select('high')
-        self.difficulty.select('medium')
+        self.difficulty.select('med')
         self.music.select('On')
         self.controls = {
             'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
