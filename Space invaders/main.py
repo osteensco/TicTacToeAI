@@ -561,7 +561,7 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         }
 
     def apply_settings(self):#passes settings to game object
-        return self.fps.selected, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
+        return self.fps.selected[1], self.difficulty.selected[1]['power'], self.difficulty.selected[1]['laser_vel'], self.controls
 
     def track_events(self):
         for event in pygame.event.get():
