@@ -111,7 +111,13 @@ class Music():
         self.shuffle_songs()
         pygame.mixer.music.load(self.currently_playing)
         # pygame.mixer.music.set_volume(self.volume)
-        pygame.mixer.music.play()
+        self.play()
+
+    def play(self):
+        pygame.mixer.music.play(fade_ms=4000)
+
+    def stop(self):
+        pygame.mixer.music.stop()
 
     def next_song(self):
         self.index += 1
