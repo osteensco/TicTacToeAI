@@ -109,12 +109,12 @@ DIFFICULTY_SETTINGS = {
 }
 
 CONTROL_SETTINGS = {
-    'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
-    'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
-    'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
-    'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
-    'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
-    'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
+    'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w, 'w'],
+    'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a, 'a'],
+    'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d, 'd'],
+    'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s, 's'],
+    'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE, 'space'],
+    'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p, 'p']
 }
 
 FPS_SETTINGS = {

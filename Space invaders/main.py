@@ -529,17 +529,21 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.music = Setting(self.generalposx, self.yspacing(3), "Music: ", self.music_options, 'On')
         
         self.controls = CONTROL_SETTINGS
-        #controlsetting class
-        #keep dict?
-        
+        self.controlsettings = self.create_control_labels()
+
         self.apply_default = Button(175, HEIGHT-115, button_menu)
         self.buttons = [self.menu_button, self.apply_default]
         self.labels = [(self.label, self.labelxy), (self.general_label, self.general_labelxy), (self.controls_label, self.controls_labelxy)]
-        self.all = [self.difficulty, self.fps, self.music]
-
+        self.all = [self.difficulty, self.fps, self.music] + self.controlsettings
 
     def create_control_labels(self):
-        pass
+        controlsettings = []
+        i = 0
+        for control in self.controls:
+            i += 1
+            c = ControlSetting(self.controls[control], self.controlsposx, self.yspacing(i))
+            controlsettings.append(c)
+        return controlsettings
 
     def yspacing(self, order):
         h = self.general_label.get_height()
@@ -556,20 +560,25 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         if self.music.selected[0] == 'Off':
             self.music.select('On')
             self.parent.music.play()
-        self.controls = {
-            'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
-            'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
-            'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
-            'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
-            'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
-            'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
-        }
+        self.controls = CONTROL_SETTINGS
+        # {
+        #     'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
+        #     'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
+        #     'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
+        #     'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
+        #     'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
+        #     'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
+        # }
 
     def apply_settings(self):#passes settings to game object
         return self.fps.selected[1], self.difficulty.selected[1]['power'], self.difficulty.selected[1]['laser_vel'], self.controls
 
     def track_events(self):
         for event in pygame.event.get():
+            for control in self.controlsettings:
+                #copy input into self.controls dictionary
+                #control.track_events()
+                pass
             if event.type == pygame.QUIT:
                 self.running = False
                 quit()
@@ -591,11 +600,9 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
                                 else:
                                     self.parent.music.stop()
 
-
     def nav_main_menu(self):
         self.running = False
         self.parent.main_menu.run()
-        
 
 
 class ViewHighScores(Menu):

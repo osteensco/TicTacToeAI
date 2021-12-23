@@ -98,8 +98,54 @@ class Setting():
 
 
 class ControlSetting():
-    def __init__(self) -> None:
-        pass
+    def __init__(self, control, x, y) -> None:
+        self.x = x
+        self.y = y
+        self.label = control[0]
+        self.key = control[1]
+        self.keylabel = control[2]
+        self.input = InputBox(self.xspacing(), self.y)
+    
+    def select(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                self.display_key = pygame.key.name(event.key)
+
+    def xspacing(self):
+        return self.x + self.label.get_width() + 20
+
+    def track_events(self, event):
+        self.input.track_events(event)
+
+    def draw(self):
+        WIN.blit(self.label, (self.x, self.y))
+        self.input.draw(WIN)
+
+
+class InputBox:
+    def __init__(self, x, y, text=''):
+        self.rect = pygame.Rect(x, y, 50, 75)
+        self.text = text
+        self.txt_surface = main_font.render(self.text, 1, (255,255,255))
+        self.active = False
+
+    def track_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.active = not self.active
+            else:
+                self.active = False
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_BACKSPACE:
+                    self.text = ''
+                else:
+                    self.text = event.unicode
+                self.txt_surface = main_font.render(self.text, True, self.color)
+
+    def draw(self, window):
+        window.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        pygame.draw.rect(window, (255,255,255), self.rect, 2)
 
 
 class Music():
