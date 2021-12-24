@@ -109,7 +109,7 @@ DIFFICULTY_SETTINGS = {
     }
 }
 
-CONTROL_SETTINGS = {
+CONTROL_SETTINGS_DEFAULT = {
     'up': [settings_font.render("Move Up", 1, (255,255,255)), pygame.K_w, 'w', 'up'],
     'left': [settings_font.render("Move Left", 1, (255,255,255)), pygame.K_a, 'a', 'left'],
     'right': [settings_font.render("Move Right", 1, (255,255,255)), pygame.K_d, 'd', 'right'],

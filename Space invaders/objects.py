@@ -98,14 +98,17 @@ class Setting:
 
 
 class ControlSetting:
-    def __init__(self, control, x, y) -> None:
+    def __init__(self, parent, control, x, y) -> None:
+        self.parent = parent
         self.x = x
         self.y = y
-        self.label = control[0]
-        self.key = control[1]
-        self.keylabel = control[2]
-        self.control_label = control[3]
+        self.items = control
+        self.label = self.items[0]
+        self.key = self.items[1]
+        self.keylabel = self.items[2]
+        self.control_label = self.items[3]
         self.input = InputBox(self, self.xspacing(), self.y - 5, self.keylabel)
+        self.update = False
 
     def variables(self):
         return [self.label, self.key, self.keylabel, self.control_label]
@@ -115,6 +118,10 @@ class ControlSetting:
 
     def track_events(self, event):
         self.input.track_events(event)
+        if self.update:
+            self.parent.controls[self.control_label] = self.variables()
+            self.update = False
+
 
     def draw(self):
         WIN.blit(self.label, (self.x, self.y))
@@ -155,7 +162,10 @@ class InputBox:
                     self.text = pygame.key.name(event.key)
                     self.parent.key = event.key
                     self.parent.keylabel = self.text
+                    self.parent.update = True
+                    self.active = False
                 self.reset()
+                
 
     def reset(self):
                 self.txt_surface = settings_font.render(self.text, True, (255,255,255))

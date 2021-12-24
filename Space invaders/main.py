@@ -28,7 +28,7 @@ from init_game import (
 )
 
 from helper_functions import dyn_background, collide, butterfly_shoot
-from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS, DIFFICULTY_SETTINGS, FPS_SETTINGS, MUSIC_SETTINGS
+from class_dictionaries import COLOR_MAP, BOSS_COLOR_MAP, BOSS_WEAPON_MAP, CONTROL_SETTINGS_DEFAULT, DIFFICULTY_SETTINGS, FPS_SETTINGS, MUSIC_SETTINGS
 from objects import Background, Setting, ControlSetting, Button, Music, Player, Boss, Enemy, Ship, Explosion, Spark
 
 
@@ -526,7 +526,8 @@ class Settings(Menu):
         self.music_options = MUSIC_SETTINGS
         self.music = Setting(self.generalposx, self.yspacing(3), "Music: ", self.music_options, 'On')
         
-        self.controls = CONTROL_SETTINGS
+        self.defaultcontrols = CONTROL_SETTINGS_DEFAULT
+        self.controls = self.defaultcontrols.copy()
         self.controlsettings = self.create_control_labels()
 
         self.apply_default = Button(175, HEIGHT-115, button_default_settings)
@@ -539,7 +540,7 @@ class Settings(Menu):
         i = 0
         for control in self.controls:
             i += 1
-            c = ControlSetting(self.controls[control], self.controlsposx, self.yspacing(i)-3)
+            c = ControlSetting(self, self.controls[control], self.controlsposx, self.yspacing(i)-3)
             controlsettings.append(c)
         return controlsettings
 
@@ -560,7 +561,8 @@ class Settings(Menu):
         if self.music.selected[0] == 'Off':
             self.music.select('On')
             self.parent.music.play()
-        self.controls = CONTROL_SETTINGS
+        self.controls = self.defaultcontrols.copy()
+        self.controlsettings = self.create_control_labels()
 
     def apply_settings(self):#passes settings to game object
         return self.fps.selected[1], self.difficulty.selected[1]['power'], self.difficulty.selected[1]['laser_vel'], self.controls
@@ -589,8 +591,6 @@ class Settings(Menu):
                                     self.parent.music.stop()
             for control in self.controlsettings:
                 control.track_events(event)
-                self.controls[control.control_label] = control.variables()
-
 
     def nav_main_menu(self):
         self.running = False
@@ -601,7 +601,16 @@ class Credits(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
         self.label = title_font.render("CREDITS", 1, (255,255,255))
+        self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
+        self.text = self.read_text()
+        self.txtlabel = main_font.render(self.text, 1, (255,255,255))
+        self.txtlabelxy = (WIDTH/2 - self.txtlabel.get_width()/2, self.label.get_height()*3)
         self.buttons = [self.menu_button]
+        self.labels = [(self.label, self.labelxy), (self.txtlabel, self.txtlabelxy)]
+
+    def read_text(self):
+        with open('MusicRights.txt', 'r') as txt:
+            return txt.read()
 
     def track_events(self):
         for event in pygame.event.get():
@@ -634,7 +643,6 @@ class App:
     def newgame(self):
         self.game = GameSession(self)
         self.game.main_loop()
-        #self.game.record()
         self.game = None
 
 if __name__ == '__main__':
