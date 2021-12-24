@@ -1,4 +1,5 @@
 import pygame
+from pygame.mixer import pause
 from init_game import (
     red_space_ship,
     red_laser,
@@ -25,7 +26,7 @@ from init_game import (
     boss_2_flect,
     boss_2_drone,
     boss_red,
-    main_font
+    settings_font
     
 )
 from helper_functions import (
@@ -109,12 +110,12 @@ DIFFICULTY_SETTINGS = {
 }
 
 CONTROL_SETTINGS = {
-    'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
-    'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
-    'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
-    'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
-    'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
-    'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
+    'up': [settings_font.render("Move Up", 1, (255,255,255)), pygame.K_w, 'w', 'up'],
+    'left': [settings_font.render("Move Left", 1, (255,255,255)), pygame.K_a, 'a', 'left'],
+    'right': [settings_font.render("Move Right", 1, (255,255,255)), pygame.K_d, 'd', 'right'],
+    'down': [settings_font.render("Move Down", 1, (255,255,255)), pygame.K_s, 's', 'down'],
+    'shoot': [settings_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE, 'space', 'shoot'],
+    'pause': [settings_font.render("Pause", 1, (255,255,255)), pygame.K_p, 'p', 'pause']
 }
 
 FPS_SETTINGS = {

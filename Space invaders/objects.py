@@ -23,7 +23,7 @@ from init_game import (
     reflect_sound,
     start_song,
     songs,
-    main_font
+    settings_font
 
 )
 from class_dictionaries import BOSS_ASSET_MAP, BOSS_COLOR_MAP, COLOR_MAP, DROP_MAP, BOSS_WEAPON_MAP
@@ -42,7 +42,7 @@ class Background:
         window.blit(self.img, (self.x, self.y))
 
 
-class Button():
+class Button:
     def __init__(self, x, y, img) -> None:
         self.x = x
         self.y = y
@@ -59,11 +59,11 @@ class Button():
             pygame.draw.rect(window, (255,255,255), self.rect, 2)
 
 
-class Setting():
+class Setting:
     def __init__(self, x, y, labeltxt, options, default) -> None:
         self.x = x
         self.y = y
-        self.label = main_font.render(labeltxt, 1, (255,255,255))
+        self.label = settings_font.render(labeltxt, 1, (255,255,255))
         self.options = options
         self.selected = [default, self.options[default]]
         self.buttons = {}
@@ -79,7 +79,7 @@ class Setting():
         count = 0
         for option, v in self.options.items():
             count += 1
-            txt = main_font.render(option, 1, (255,255,255))
+            txt = settings_font.render(option, 1, (255,255,255))
             self.buttons[option] = Button(self.spacing(count), self.y, txt)
 
     def draw(self):
@@ -97,12 +97,79 @@ class Setting():
         return self.label.get_height
 
 
-class ControlSetting():
-    def __init__(self) -> None:
-        pass
+class ControlSetting:
+    def __init__(self, control, x, y) -> None:
+        self.x = x
+        self.y = y
+        self.label = control[0]
+        self.key = control[1]
+        self.keylabel = control[2]
+        self.control_label = control[3]
+        self.input = InputBox(self, self.xspacing(), self.y - 5, self.keylabel)
+
+    def variables(self):
+        return [self.label, self.key, self.keylabel, self.control_label]
+
+    def xspacing(self):
+        return self.x + self.label.get_width() + 20
+
+    def track_events(self, event):
+        self.input.track_events(event)
+
+    def draw(self):
+        WIN.blit(self.label, (self.x, self.y))
+        self.input.draw(WIN)
 
 
-class Music():
+class InputBox:
+    def __init__(self, parent, x, y, text=''):
+        self.x = x
+        self.y = y
+        self.parent = parent
+        self.text = text
+        self.txt_surface = settings_font.render(self.text, 1, (255,255,255))
+        self.w = self.get_width()
+        self.h = 30
+        self.rect = pygame.Rect(x, y, self.w, self.h)
+        self.active = False
+
+    def get_width(self):
+        w = self.txt_surface.get_width()
+        if w < 5:
+            return 5
+        else:
+            return w + 10
+
+    def track_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse = pygame.mouse.get_pos()
+            if self.rect.collidepoint(mouse):
+                self.active = not self.active
+            else:
+                self.active = False
+        if self.active and event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_BACKSPACE:
+                    self.text = ''
+                else:
+                    self.text = pygame.key.name(event.key)
+                    self.parent.key = event.key
+                    self.parent.keylabel = self.text
+                self.reset()
+
+    def reset(self):
+                self.txt_surface = settings_font.render(self.text, True, (255,255,255))
+                self.w = self.get_width()
+                self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+
+
+
+    def draw(self, window):
+        window.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        pygame.draw.rect(window, (255,255,255), self.rect, 2)
+
+
+class Music:
     def __init__(self) -> None:
         self.currently_playing = start_song
         self.index = -1
@@ -111,7 +178,13 @@ class Music():
         self.shuffle_songs()
         pygame.mixer.music.load(self.currently_playing)
         # pygame.mixer.music.set_volume(self.volume)
-        pygame.mixer.music.play()
+        self.play()
+
+    def play(self):
+        pygame.mixer.music.play(fade_ms=4000)
+
+    def stop(self):
+        pygame.mixer.music.stop()
 
     def next_song(self):
         self.index += 1
@@ -393,7 +466,6 @@ class BossLaser(Laser):
         self.exploding = False
         self.explosion_time = 0
         self.explosion_sound = explosion_sound2
-
 
     def img_rotate(self, img, angle):
         self.angle += self.vel*2

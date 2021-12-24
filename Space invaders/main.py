@@ -41,7 +41,7 @@ bg4 = Background(x_adj, y_adj, bg4_img)
 bgs = [bg1, bg2, bg3, bg4]
 
 
-class GameSession():
+class GameSession:
     def __init__(self, parent) -> None:
         self.parent = parent
         self.scroll_vel = scroll_vel
@@ -49,7 +49,6 @@ class GameSession():
         self.level = 0
         self.enemies = []
         self.wave_length = 3
-        self.scroll_vel = 2
         self.FPS, self.enemy_power, self.enemy_laser_vel, self.controls = parent.settings.apply_settings()
         self.enemy_vel = 1
         self.player_vel = 10#variable to determine how many pixels per keystroke player moves
@@ -111,7 +110,7 @@ class GameSession():
                                     HEIGHT - butterfly_label.get_height() - 10))
 
         if len(self.enemies) == 0 and self.player.lives > 0 and self.level > 0:
-            transition_level_label = title_font.render(f"Level Complete! Wave {self.level + 1} incoming!", 1,
+            transition_level_label = main_font.render(f"Level Complete! Wave {self.level + 1} incoming!", 1,
                                                     (255, 255, 255))
             WIN.blit(transition_level_label, (
                 WIDTH / 2 - transition_level_label.get_width() / 2,
@@ -445,10 +444,11 @@ class GameSession():
 
 
 #______________________________________________MENUS____________________________________________________________________________________
-class Menu():
+class Menu:
     def __init__(self, app) -> None:
         self.parent = app
         self.running = False
+        self.scroll_vel = scroll_vel/20
         self.label = title_font.render("SPACE DEFENSE!", 1, (255,255,255))
         self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5), button_play)
@@ -466,7 +466,7 @@ class Menu():
             self.track_events()
 
     def background(self):
-        dyn_background(self.bgs, scroll_vel/5, x_adj, y_adj)
+        dyn_background(self.bgs, self.scroll_vel, x_adj, y_adj)
         for bg in self.bgs:
             bg.draw(WIN)
 
@@ -507,18 +507,17 @@ class Menu():
         
 
 
-class Settings(Menu):#have settings save in SQLite DB so they're the same on reopen
+class Settings(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
         self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.general_label = main_font.render("General", 1, (255,255,255))
         self.general_labelxy = (WIDTH/4 - self.general_label.get_width()/2, self.labelxy[1]+self.label.get_height()+10)
-        self.generalposx = self.general_labelxy[0] - self.general_label.get_width()/2
+        self.generalposx = self.general_labelxy[0] - self.general_label.get_width()*.75
         self.controls_label = main_font.render("Controls", 1, (255,255,255))
         self.controls_labelxy = (WIDTH - WIDTH/4 - self.controls_label.get_width()/2, self.labelxy[1]+self.label.get_height()+10)
-        self.controlsposx = self.controls_labelxy[0] - self.controls_label.get_width()/2
-        
+        self.controlsposx = self.controls_labelxy[0]
 
         self.fps_options = FPS_SETTINGS
         self.fps = Setting(self.generalposx, self.yspacing(1), "FPS: ", self.fps_options, 'high')
@@ -530,45 +529,50 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
         self.music = Setting(self.generalposx, self.yspacing(3), "Music: ", self.music_options, 'On')
         
         self.controls = CONTROL_SETTINGS
-        #controlsetting class
-        #keep dict?
-        
+        self.controlsettings = self.create_control_labels()
+
         self.apply_default = Button(175, HEIGHT-115, button_menu)
         self.buttons = [self.menu_button, self.apply_default]
         self.labels = [(self.label, self.labelxy), (self.general_label, self.general_labelxy), (self.controls_label, self.controls_labelxy)]
         self.all = [self.difficulty, self.fps, self.music]
 
+    def create_control_labels(self):
+        controlsettings = []
+        i = 0
+        for control in self.controls:
+            i += 1
+            c = ControlSetting(self.controls[control], self.controlsposx, self.yspacing(i)-3)
+            controlsettings.append(c)
+        return controlsettings
+
     def yspacing(self, order):
         h = self.general_label.get_height()
-        return (self.general_labelxy[1] + h) + ((h+50) * order)
+        return (self.general_labelxy[1] + h) + ((h+30) * order)
 
     def display(self):
         super().display()
         for setting in self.all:
             setting.draw()
+        for control in self.controlsettings:
+            control.draw()
 
     def default_settings(self):
         self.fps.select('high')
         self.difficulty.select('med')
-        self.music.select('On')
-        self.controls = {
-            'up': [main_font.render("Move Up", 1, (255,255,255)), pygame.K_w],
-            'left': [main_font.render("Move Left", 1, (255,255,255)), pygame.K_a],
-            'right': [main_font.render("Move Right", 1, (255,255,255)), pygame.K_d],
-            'down': [main_font.render("Move Down", 1, (255,255,255)), pygame.K_s],
-            'shoot': [main_font.render("Shoot", 1, (255,255,255)), pygame.K_SPACE],
-            'pause': [main_font.render("Pause", 1, (255,255,255)), pygame.K_p]
-        }
+        if self.music.selected[0] == 'Off':
+            self.music.select('On')
+            self.parent.music.play()
+        self.controls = CONTROL_SETTINGS
 
     def apply_settings(self):#passes settings to game object
-        return self.fps.selected, self.difficulty['power'], self.difficulty['laser_vel'], self.controls
+        return self.fps.selected[1], self.difficulty.selected[1]['power'], self.difficulty.selected[1]['laser_vel'], self.controls
 
     def track_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 quit()
-            if event.type == self.parent.MUSIC_END:
+            if self.music.selected == 'On' and event.type == self.parent.MUSIC_END:
                 self.parent.music.next_song()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse = pygame.mouse.get_pos()
@@ -576,11 +580,23 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
                     self.nav_main_menu()
                 if self.apply_default.click(mouse):
                     self.default_settings()
+                for setting in self.all:
+                    for option in setting.options:
+                        if setting.buttons[option].click(mouse):
+                            setting.select(option)
+                            if setting is self.music:
+                                if option == 'On':
+                                    self.parent.music.play()
+                                else:
+                                    self.parent.music.stop()
+            for control in self.controlsettings:
+                control.track_events(event)
+                self.controls[control.control_label] = control.variables()
+
 
     def nav_main_menu(self):
         self.running = False
         self.parent.main_menu.run()
-        
 
 
 class ViewHighScores(Menu):
@@ -606,7 +622,7 @@ class ViewHighScores(Menu):
         self.parent.main_menu.run()
 
 
-class ScoreRecord():
+class ScoreRecord:
     def __init__(self, score) -> None:
         self.score = score
         #self.enemies_destroyed
@@ -618,7 +634,7 @@ class ScoreRecord():
         pass
 
 
-class App():
+class App:
     def __init__(self) -> None:
         self.music = Music()
         self.MUSIC_END = pygame.USEREVENT+1

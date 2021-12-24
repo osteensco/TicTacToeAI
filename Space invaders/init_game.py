@@ -9,9 +9,10 @@ pygame.mixer.init()
 WIDTH, HEIGHT = 1080, 650
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Defense")
+
 main_font = pygame.font.SysFont("comicsans", 50)
+settings_font = pygame.font.SysFont("comicsans", 30)
 lost_font = pygame.font.SysFont("comicsans", 100)
-#menu and in game messaging font
 title_font = pygame.font.SysFont("comicsans", 100)
 
 
