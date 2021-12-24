@@ -57,6 +57,8 @@ button_play = load_image("assets", "button_play.png")
 button_settings = load_image("assets", "button_settings.png")
 button_highscores = load_image("assets", "button_highscores.png")
 button_menu = load_image("assets", "button_menu.png")
+button_default_settings = load_image("assets", "button_default_sett.png")
+button_credits = load_image("assets", "button_credits.png")
 
 #drops
 health_drop = load_image("assets", "health_drop.png")

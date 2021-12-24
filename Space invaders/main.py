@@ -21,8 +21,9 @@ from init_game import (
     enparmove,
     button_play,
     button_settings,
-    button_highscores,
+    button_credits,
     button_menu,
+    button_default_settings
 
 )
 
@@ -64,9 +65,6 @@ class GameSession:
         
     def setpause(self):
         return not self.pause
-
-    def record(self):#create object that transfers score and other stats to SQLite DB
-        score = ScoreRecord(self.player.score)
 
     def redraw_window(self):
         for bg in self.bgs:
@@ -453,9 +451,9 @@ class Menu:
         self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.play_button = Button(WIDTH/2 - button_play.get_width()/2, (HEIGHT/2) - (button_play.get_height()*1.5), button_play)
         self.settings_button = Button(WIDTH/2 - button_settings.get_width()/2, (HEIGHT/2) - (button_settings.get_height()/2) , button_settings)
-        self.highscores_button = Button(WIDTH/2 - button_highscores.get_width()/2, (HEIGHT/2) + (button_highscores.get_height()/2), button_highscores)
+        self.credits_button = Button(WIDTH/2 - button_credits.get_width()/2, (HEIGHT/2) + (button_credits.get_height()/2), button_credits)
         self.menu_button = Button(15, HEIGHT-115, button_menu)
-        self.buttons = [self.play_button, self.settings_button, self.highscores_button]
+        self.buttons = [self.play_button, self.settings_button, self.credits_button]
         self.labels = [(self.label, self.labelxy)]
         self.bgs = bgs
 
@@ -494,7 +492,7 @@ class Menu:
                     self.parent.newgame()
                 if self.settings_button.click(mouse):
                     self.nav_settings()
-                if self.highscores_button.click(mouse):
+                if self.credits_button.click(mouse):
                     self.nav_view_scores()
 
     def nav_settings(self):
@@ -503,7 +501,7 @@ class Menu:
 
     def nav_view_scores(self):
         self.running = False
-        self.parent.highscores.run()
+        self.parent.credits.run()
         
 
 
@@ -531,7 +529,7 @@ class Settings(Menu):
         self.controls = CONTROL_SETTINGS
         self.controlsettings = self.create_control_labels()
 
-        self.apply_default = Button(175, HEIGHT-115, button_menu)
+        self.apply_default = Button(175, HEIGHT-115, button_default_settings)
         self.buttons = [self.menu_button, self.apply_default]
         self.labels = [(self.label, self.labelxy), (self.general_label, self.general_labelxy), (self.controls_label, self.controls_labelxy)]
         self.all = [self.difficulty, self.fps, self.music]
@@ -599,10 +597,10 @@ class Settings(Menu):
         self.parent.main_menu.run()
 
 
-class ViewHighScores(Menu):
+class Credits(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
-        self.label = title_font.render("HIGH SCORES", 1, (255,255,255))
+        self.label = title_font.render("CREDITS", 1, (255,255,255))
         self.buttons = [self.menu_button]
 
     def track_events(self):
@@ -622,18 +620,6 @@ class ViewHighScores(Menu):
         self.parent.main_menu.run()
 
 
-class ScoreRecord:
-    def __init__(self, score) -> None:
-        self.score = score
-        #self.enemies_destroyed
-        #self.levels_completed
-        #self.time_played
-        #other statistics that might be interesting
-
-    def enter_name(self):#textbox to enter the name
-        pass
-
-
 class App:
     def __init__(self) -> None:
         self.music = Music()
@@ -641,7 +627,7 @@ class App:
         pygame.mixer.music.set_endevent(self.MUSIC_END)
         self.main_menu = Menu(self)#starts game at main menu when game is opened
         self.settings = Settings(self)
-        self.highscores = ViewHighScores(self)
+        self.credits = Credits(self)
         self.game = None
         self.main_menu.run()
 
