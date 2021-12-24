@@ -104,12 +104,11 @@ class ControlSetting:
         self.label = control[0]
         self.key = control[1]
         self.keylabel = control[2]
-        self.input = InputBox(self.xspacing(), self.y - 5, self.keylabel)
-    
-    def select(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                self.display_key = pygame.key.name(event.key)
+        self.control_label = control[3]
+        self.input = InputBox(self, self.xspacing(), self.y - 5, self.keylabel)
+
+    def variables(self):
+        return [self.label, self.key, self.keylabel, self.control_label]
 
     def xspacing(self):
         return self.x + self.label.get_width() + 20
@@ -123,7 +122,10 @@ class ControlSetting:
 
 
 class InputBox:
-    def __init__(self, x, y, text=''):
+    def __init__(self, parent, x, y, text=''):
+        self.x = x
+        self.y = y
+        self.parent = parent
         self.text = text
         self.txt_surface = settings_font.render(self.text, 1, (255,255,255))
         self.w = self.get_width()
@@ -140,17 +142,27 @@ class InputBox:
 
     def track_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                self.active = True
+            mouse = pygame.mouse.get_pos()
+            if self.rect.collidepoint(mouse):
+                self.active = not self.active
             else:
                 self.active = False
-        if event.type == pygame.KEYDOWN:
+        if self.active and event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
                     self.text = ''
                 else:
-                    self.text = event.unicode
-                self.txt_surface = settings_font.render(self.text, True, self.color)
+                    self.text = pygame.key.name(event.key)
+                    self.parent.key = event.key
+                    self.parent.keylabel = self.text
+                self.reset()
+
+    def reset(self):
+                self.txt_surface = settings_font.render(self.text, True, (255,255,255))
+                self.w = self.get_width()
+                self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+
+
 
     def draw(self, window):
         window.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
@@ -454,7 +466,6 @@ class BossLaser(Laser):
         self.exploding = False
         self.explosion_time = 0
         self.explosion_sound = explosion_sound2
-
 
     def img_rotate(self, img, angle):
         self.angle += self.vel*2

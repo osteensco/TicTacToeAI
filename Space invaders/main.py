@@ -41,7 +41,7 @@ bg4 = Background(x_adj, y_adj, bg4_img)
 bgs = [bg1, bg2, bg3, bg4]
 
 
-class GameSession():
+class GameSession:
     def __init__(self, parent) -> None:
         self.parent = parent
         self.scroll_vel = scroll_vel
@@ -444,7 +444,7 @@ class GameSession():
 
 
 #______________________________________________MENUS____________________________________________________________________________________
-class Menu():
+class Menu:
     def __init__(self, app) -> None:
         self.parent = app
         self.running = False
@@ -507,7 +507,7 @@ class Menu():
         
 
 
-class Settings(Menu):#have settings save in SQLite DB so they're the same on reopen
+class Settings(Menu):
     def __init__(self, app) -> None:
         super().__init__(app)
         self.label = title_font.render("SETTINGS", 1, (255,255,255))
@@ -569,10 +569,6 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
 
     def track_events(self):
         for event in pygame.event.get():
-            for control in self.controlsettings:
-                #copy input into self.controls dictionary
-                #control.track_events()
-                pass
             if event.type == pygame.QUIT:
                 self.running = False
                 quit()
@@ -593,8 +589,10 @@ class Settings(Menu):#have settings save in SQLite DB so they're the same on reo
                                     self.parent.music.play()
                                 else:
                                     self.parent.music.stop()
-                for control in self.controlsettings:
-                    control.track_events(event)
+            for control in self.controlsettings:
+                control.track_events(event)
+                self.controls[control.control_label] = control.variables()
+
 
     def nav_main_menu(self):
         self.running = False
@@ -624,7 +622,7 @@ class ViewHighScores(Menu):
         self.parent.main_menu.run()
 
 
-class ScoreRecord():
+class ScoreRecord:
     def __init__(self, score) -> None:
         self.score = score
         #self.enemies_destroyed
@@ -636,7 +634,7 @@ class ScoreRecord():
         pass
 
 
-class App():
+class App:
     def __init__(self) -> None:
         self.music = Music()
         self.MUSIC_END = pygame.USEREVENT+1
