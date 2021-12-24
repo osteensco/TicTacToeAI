@@ -14,6 +14,7 @@ from init_game import (
     WIN,
     main_font,
     title_font,
+    credits_font,
     lost_font,
     quadrant,
     set_FPS,
@@ -603,14 +604,39 @@ class Credits(Menu):
         self.label = title_font.render("CREDITS", 1, (255,255,255))
         self.labelxy = (WIDTH/2 - self.label.get_width()/2, self.label.get_height()/2)
         self.text = self.read_text()
-        self.txtlabel = main_font.render(self.text, 1, (255,255,255))
-        self.txtlabelxy = (WIDTH/2 - self.txtlabel.get_width()/2, self.label.get_height()*3)
+        self.textxy = [150, self.label.get_height()*2]
         self.buttons = [self.menu_button]
-        self.labels = [(self.label, self.labelxy), (self.txtlabel, self.txtlabelxy)]
+        self.labels = [(self.label, self.labelxy)]
 
     def read_text(self):
         with open('MusicRights.txt', 'r') as txt:
             return txt.read()
+
+    def display_text(self):
+        words = [word.split(' ') for word in self.text.splitlines()]  # 2D array where each row is a list of words.
+        space = credits_font.size(' ')[0]  # The width of a space.
+        w = WIDTH/3 + 150
+        h = HEIGHT - 100
+        x, y = self.textxy
+        col = 0
+        for line in words:
+            for word in line:
+                word_label = credits_font.render(word, 1, (255,255,255))
+                if x + word_label.get_width() >= ((col+1)*w):
+                    x = self.textxy[0] + (col*w)  # Reset the x.
+                    y += word_label.get_height()  # Start on new row.
+                if y >= h:
+                    y = self.textxy[1]
+                    col += 1
+                WIN.blit(word_label, (x, y))
+                x += word_label.get_width() + space
+            x = self.textxy[0] + (col*w)  # Reset the x.
+            y += word_label.get_height()  # Start on new row.
+
+
+    def display(self):
+        super().display()
+        self.display_text()
 
     def track_events(self):
         for event in pygame.event.get():

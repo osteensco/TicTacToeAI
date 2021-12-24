@@ -14,6 +14,7 @@ main_font = pygame.font.SysFont("comicsans", 50)
 settings_font = pygame.font.SysFont("comicsans", 30)
 lost_font = pygame.font.SysFont("comicsans", 100)
 title_font = pygame.font.SysFont("comicsans", 100)
+credits_font = pygame.font.SysFont("comicsans", 17)
 
 
 # variables
