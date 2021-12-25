@@ -139,7 +139,8 @@ def mine_mechanic(boss, laser, obj):
         obj.health -= boss.power/6
     if laser.explosion_time > set_FPS / 3 or boss.health <= 0:
         boss.lasers.remove(laser)
-    boss.cool_down_counter -= .75
+    if boss.COOLDOWN != 100:
+        boss.COOLDOWN = 100
 
 def laser_mechanic(boss, laser, obj):
     if laser.off_screen(HEIGHT+50, WIDTH):
@@ -147,7 +148,7 @@ def laser_mechanic(boss, laser, obj):
     if laser.collision(obj) and not obj.immune:
         obj.health -= boss.power/2
         boss.lasers.remove(laser)
-    boss.cool_down_counter += 10
+    boss.cool_down_counter += 25
 
 def shotgun_mechanic(boss, laser, obj):
     if laser.off_screen(HEIGHT, WIDTH+100):

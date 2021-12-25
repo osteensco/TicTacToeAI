@@ -534,15 +534,14 @@ class BossLaser(Laser):
 
 
 class Ship:
-    COOLDOWN = 25
-    clear_img = blank
-    boom = explosions
-
     def __init__(self, x, y, vel, laser_vel, health=100):
         self.x = x
         self.y = y
         self.max_health = health
         self.health = self.max_health
+        self.COOLDOWN = 25
+        self.clear_img = blank
+        self.boom = explosions
         self.ship_img = None
         self.mask = None
         self.laser_img = None
