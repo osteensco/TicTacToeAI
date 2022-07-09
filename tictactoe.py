@@ -160,7 +160,7 @@ def play_cpu(diff):
         if player == turn:
             print('Turn for ' + turn + '. Move on which space?')
             move = str(input()).lower()
-
+            
             if move == 'quit':
                 return False
             elif move == 'reset':
@@ -185,9 +185,11 @@ def play_cpu(diff):
                 each[move] = turn
         if check_win(turn, winconditions):
             print(str(turn) + ' is the winner!')
+            printBoard(theBoard)
             game = False
             #checks for a draw, keeps count of empty spots left
         if game and check_draw(theBoard):
+            printBoard(theBoard)
             print('''It's a draw!''')
             game = False
 
